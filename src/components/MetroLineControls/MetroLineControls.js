@@ -7,6 +7,7 @@ export default function MetroLineControls() {
     red: true,
     blue: true,
     green: true,
+    extendedBlue: true,
   });
 
   console.log("MetroLineControls component rendering");
@@ -22,7 +23,13 @@ export default function MetroLineControls() {
     if (svgObject && svgObject.contentDocument) {
       const svgDoc = svgObject.contentDocument;
       const className =
-        line === "red" ? "st7" : line === "blue" ? "st8" : "st10";
+        line === "red"
+          ? "st4"
+          : line === "blue"
+          ? "st5"
+          : line === "green"
+          ? "st6"
+          : "st8";
       const svgElements = svgDoc.querySelectorAll(`.${className}`);
 
       svgElements.forEach((element) => {
@@ -72,6 +79,27 @@ export default function MetroLineControls() {
             </div>
           </button>
 
+          {/* Green Line */}
+          <button
+            onClick={() => toggleLine("green")}
+            className="group w-full flex items-center justify-start px-3 py-2.5 rounded-2xl transition-all duration-300 hover:bg-gray-800/10"
+          >
+            <div className="flex items-center gap-3">
+              <div
+                className="w-3 h-3 rounded-full shadow-sm"
+                style={{
+                  backgroundColor: visibleLines.green ? "#70a760" : "#ffffff60",
+                  boxShadow: visibleLines.green
+                    ? "0 0 8px rgba(112, 167, 96, 0.4)"
+                    : "none",
+                }}
+              />
+              <span className="text-sm font-medium text-gray-800/90">
+                Green Line
+              </span>
+            </div>
+          </button>
+
           {/* Blue Line */}
           <button
             onClick={() => toggleLine("blue")}
@@ -93,23 +121,25 @@ export default function MetroLineControls() {
             </div>
           </button>
 
-          {/* Green Line */}
+          {/* Extended Blue Line */}
           <button
-            onClick={() => toggleLine("green")}
+            onClick={() => toggleLine("extendedBlue")}
             className="group w-full flex items-center justify-start px-3 py-2.5 rounded-2xl transition-all duration-300 hover:bg-gray-800/10"
           >
             <div className="flex items-center gap-3">
               <div
                 className="w-3 h-3 rounded-full shadow-sm"
                 style={{
-                  backgroundColor: visibleLines.green ? "#70a760" : "#ffffff60",
-                  boxShadow: visibleLines.green
-                    ? "0 0 8px rgba(112, 167, 96, 0.4)"
+                  backgroundColor: visibleLines.extendedBlue
+                    ? "#5790af"
+                    : "#ffffff60",
+                  boxShadow: visibleLines.extendedBlue
+                    ? "0 0 8px rgba(87, 144, 175, 0.4)"
                     : "none",
                 }}
               />
               <span className="text-sm font-medium text-gray-800/90">
-                Green Line
+                Extended Blue Line
               </span>
             </div>
           </button>
