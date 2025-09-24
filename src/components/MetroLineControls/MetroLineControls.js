@@ -121,7 +121,7 @@ export default function MetroLineControls() {
             </div>
           </button>
 
-          {/* Extended Blue Line */}
+          {/* Proposed Blue Line */}
           <button
             onClick={() => toggleLine("extendedBlue")}
             className="group w-full flex items-center justify-start px-3 py-2.5 rounded-2xl transition-all duration-300 hover:bg-gray-800/10"
@@ -139,7 +139,7 @@ export default function MetroLineControls() {
                 }}
               />
               <span className="text-sm font-medium text-gray-800/90">
-                Extended Blue Line
+                Proposed Blue Line
               </span>
             </div>
           </button>
