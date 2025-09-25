@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+import { getActualCloudinaryUrl, ensureClientSideDataLoaded } from "../../utils/cloudinary-mapping";
 
 export default function Brochure({
   setSideBarButtonClicked,
@@ -179,24 +180,42 @@ export default function Brochure({
       const fileName = brochureFileMap[property];
 
       if (!fileName) {
+        const localPath = `/communities/${community}/${property}/BROCHURE/${property.toUpperCase()}_BROCHURE.pdf`;
+        const cloudinaryUrl = getActualCloudinaryUrl(localPath);
+        
+        // Only return brochure if it exists in Cloudinary
+        if (cloudinaryUrl) {
+          return [
+            {
+              id: 1,
+              name: `${property.toUpperCase()}_BROCHURE.pdf`,
+              url: cloudinaryUrl,
+              size: "2.5 MB",
+            },
+          ];
+        }
+        
+        // Return empty array if brochure not found in Cloudinary
+        return [];
+      }
+
+      const localPath = `/communities/${community}/${property}/BROCHURE/${fileName}`;
+      const cloudinaryUrl = getActualCloudinaryUrl(localPath);
+      
+      // Only return brochure if it exists in Cloudinary
+      if (cloudinaryUrl) {
         return [
           {
             id: 1,
-            name: `${property.toUpperCase()}_BROCHURE.pdf`,
-            url: `/communities/${community}/${property}/BROCHURE/${property.toUpperCase()}_BROCHURE.pdf`,
+            name: fileName,
+            url: cloudinaryUrl,
             size: "2.5 MB",
           },
         ];
       }
-
-      return [
-        {
-          id: 1,
-          name: fileName,
-          url: `/communities/${community}/${property}/BROCHURE/${fileName}`,
-          size: "2.5 MB",
-        },
-      ];
+      
+      // Return empty array if brochure not found in Cloudinary
+      return [];
     } catch (error) {
       console.error("Error fetching brochure files:", error);
       return [];
@@ -224,10 +243,12 @@ export default function Brochure({
     }
   }, [selectedProperty, onPropertySelect]);
 
-  // Load brochure files when property changes
+  // Load client-side data and brochures when property changes
   useEffect(() => {
     if (selectedProperty) {
       const loadBrochures = async () => {
+        // Ensure client-side data is loaded
+        await ensureClientSideDataLoaded();
         const files = await getBrochureFiles(
           selectedProperty.community,
           selectedProperty.name
@@ -251,8 +272,9 @@ export default function Brochure({
     };
   }, [isDropdownOpen]);
 
+  
   return (
-    <div className="w-full h-screen bg-gray-900 relative">
+    <div className="w-screen h-screen bg-gray-900 relative fixed inset-0">
       {/* Property Dropdown */}
       <div className="absolute bottom-4 right-4 z-50 dropdown-container">
         <button
@@ -313,17 +335,41 @@ export default function Brochure({
       )}
 
       {/* Brochure Viewer */}
-      <div className="absolute inset-0 w-full h-full">
+      <div className="absolute inset-0 w-screen h-screen">
         {brochureFiles.length > 0 ? (
-          <iframe
-            src={`${brochureFiles[0]?.url}#toolbar=0&navpanes=0&scrollbar=0&statusbar=0&messages=0&scrollbar=0`}
-            className="w-full h-full border-0"
-            title={`${selectedProperty?.displayName} Brochure PDF`}
-            style={{ width: "100vw", height: "100vh" }}
-            allowFullScreen
-          />
+          <div className="w-screen h-screen">
+            <div className="w-screen h-screen overflow-auto bg-white">
+              {brochureFiles[0]?.url.includes('/raw/upload/') ? (
+                // Display as PDF if it's a raw upload
+                <iframe
+                  src={`${brochureFiles[0]?.url}#toolbar=0&navpanes=0&scrollbar=0&statusbar=0&messages=0&scrollbar=0`}
+                  className="w-full h-screen border-0"
+                  title={`${selectedProperty?.displayName} Brochure PDF`}
+                  style={{ 
+                    width: "100%", 
+                    height: "100vh",
+                    border: "none"
+                  }}
+                  allowFullScreen
+                />
+              ) : (
+                // Display as image if it's a converted upload
+                <img
+                  src={brochureFiles[0]?.url}
+                  alt={`${selectedProperty?.displayName} Brochure`}
+                  className="w-full h-auto"
+                  style={{ 
+                    width: "100%", 
+                    height: "auto",
+                    minHeight: "100vh",
+                    objectFit: "contain"
+                  }}
+                />
+              )}
+            </div>
+          </div>
         ) : (
-          <div className="w-full h-full bg-white flex items-center justify-center">
+          <div className="w-screen h-screen bg-white flex items-center justify-center">
             <div className="text-center">
               <svg
                 className="w-16 h-16 text-gray-400 mx-auto mb-4"

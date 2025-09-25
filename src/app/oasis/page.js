@@ -28,7 +28,9 @@ export default function OasisPage() {
       )}
       {sideBarButtonClicked === 2 && <Gallery />}
       {sideBarButtonClicked === 1 && (
-        <FloorPlans setSideBarButtonClicked={setSideBarButtonClicked} />
+        <div className="fixed inset-0 w-screen h-screen z-50">
+          <FloorPlans setSideBarButtonClicked={setSideBarButtonClicked} />
+        </div>
       )}
 
       <NavBar isFullScreen={isFullScreen} setIsFullScreen={setIsFullScreen} />

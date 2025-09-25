@@ -23,11 +23,13 @@ export default function DubaiCreekHarbourPage() {
         <SimpleMap setSideBarButtonClicked={setSideBarButtonClicked} />
       )}
       {sideBarButtonClicked === 2 && (
-        <FloorPlans
-          setSideBarButtonClicked={setSideBarButtonClicked}
-          communitySlug="dubai-creek-harbour"
-          onPropertySelect={setSelectedProperty}
-        />
+        <div className="fixed inset-0 w-screen h-screen z-50">
+          <FloorPlans
+            setSideBarButtonClicked={setSideBarButtonClicked}
+            communitySlug="dubai-creek-harbour"
+            onPropertySelect={setSelectedProperty}
+          />
+        </div>
       )}
       {sideBarButtonClicked === 3 && (
         <Gallery
@@ -36,11 +38,13 @@ export default function DubaiCreekHarbourPage() {
         />
       )}
       {sideBarButtonClicked === 4 && (
-        <Brochure
-          setSideBarButtonClicked={setSideBarButtonClicked}
-          communitySlug="dubai-creek-harbour"
-          onPropertySelect={setSelectedProperty}
-        />
+        <div className="fixed inset-0 w-screen h-screen z-50">
+          <Brochure
+            setSideBarButtonClicked={setSideBarButtonClicked}
+            communitySlug="dubai-creek-harbour"
+            onPropertySelect={setSelectedProperty}
+          />
+        </div>
       )}
 
       <NavBar isFullScreen={isFullScreen} setIsFullScreen={setIsFullScreen} />
