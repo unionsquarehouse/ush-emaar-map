@@ -3,6 +3,7 @@
 import Gallery from "@/components/Gallery/Gallery";
 import Oasis from "@/components/Oasis/Oasis";
 import SimpleOasis from "@/components/Oasis/SimpleOasis";
+import FloorPlans from "@/components/FloorPlans/FloorPlans";
 import NavBar from "@/components/NavBar/NavBar";
 import ProjectMap from "@/components/ProjectMap/ProjectMap";
 import SideBar from "@/components/SideBar/SideBar";
@@ -27,7 +28,7 @@ export default function OasisPage() {
       )}
       {sideBarButtonClicked === 2 && <Gallery />}
       {sideBarButtonClicked === 1 && (
-        <SimpleOasis setSideBarButtonClicked={setSideBarButtonClicked} />
+        <FloorPlans setSideBarButtonClicked={setSideBarButtonClicked} />
       )}
 
       <NavBar isFullScreen={isFullScreen} setIsFullScreen={setIsFullScreen} />

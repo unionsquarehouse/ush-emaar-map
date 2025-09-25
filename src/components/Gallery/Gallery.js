@@ -6,16 +6,29 @@ import { useParams } from "next/navigation";
 
 export default function Gallery() {
   const [isButtonClicked, setIsButtonClicked] = useState(false);
-  const [selectedButton, setSelectedButton] = useState(null);
+  const [selectedButton, setSelectedButton] = useState("The Oasis");
   const [selectedBottomButton, setSelectedBottomButton] = useState(null);
   const [galleryData, setGalleryData] = useState(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [currentImageUrl, setCurrentImageUrl] = useState(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const buttonContainerRef = useRef(null);
   const { slug } = useParams();
   const [bottomButtons, setBottomButtons] = useState(null);
+
+  // All 8 properties
+  const properties = [
+    "The Oasis",
+    "Grand Polo",
+    "Emaar South",
+    "Dubai Hills",
+    "Expo Living",
+    "Dubai Creek Harbour",
+    "Rashid Yachts",
+    "The Valley",
+  ];
   // Check if scroll buttons should be visible
   const checkScroll = () => {
     if (buttonContainerRef.current) {
@@ -53,6 +66,26 @@ export default function Gallery() {
     setIsImageLoaded(true);
   };
 
+  const nextImage = () => {
+    if (bottomButtons && bottomButtons.length > 0) {
+      setCurrentImageIndex((prevIndex) =>
+        prevIndex === bottomButtons.length - 1 ? 0 : prevIndex + 1
+      );
+    }
+  };
+
+  const prevImage = () => {
+    if (bottomButtons && bottomButtons.length > 0) {
+      setCurrentImageIndex((prevIndex) =>
+        prevIndex === 0 ? bottomButtons.length - 1 : prevIndex - 1
+      );
+    }
+  };
+
+  const goToImage = (index) => {
+    setCurrentImageIndex(index);
+  };
+
   // Add useEffect to check scroll on mount and button changes
   useEffect(() => {
     checkScroll();
@@ -84,12 +117,23 @@ export default function Gallery() {
         setBottomButtons(project.data[0].gallery[0].bottom_buttons);
         setSelectedBottomButton(initialButton);
         setCurrentImageUrl(initialButton?.image?.url);
+        setCurrentImageIndex(0);
       } catch (error) {
         console.error("Error fetching gallery data:", error);
       }
     };
     fetchData();
   }, [slug]);
+
+  // Update current image when index changes
+  useEffect(() => {
+    if (bottomButtons && bottomButtons[currentImageIndex]) {
+      const selectedButton = bottomButtons[currentImageIndex];
+      setSelectedBottomButton(selectedButton);
+      setCurrentImageUrl(selectedButton?.image?.url);
+      setIsImageLoaded(false);
+    }
+  }, [currentImageIndex, bottomButtons]);
 
   return (
     <>
@@ -136,9 +180,9 @@ export default function Gallery() {
         </div>
 
         {/* DropDown Button */}
-        <div className="w-fit absolute bottom-10 left-0 md:ml-5 ">
+        <div className="absolute bottom-20 left-4 z-50">
           <button
-            className="bg-black font-normal text-sm text-white px-4 py-2 rounded-md flex flex-row items-center gap-2 cursor-pointer scale-50 md:scale-100 -translate-x-5 md:-translate-x-0"
+            className="bg-black/80 text-white px-4 py-2 rounded-md flex items-center gap-2 text-sm font-normal cursor-pointer"
             onClick={() => setIsButtonClicked(!isButtonClicked)}
           >
             {selectedButton}
@@ -146,9 +190,9 @@ export default function Gallery() {
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
               fill="currentColor"
-              className={`size-6 ${
+              className={`w-4 h-4 transition-transform duration-300 ${
                 isButtonClicked ? "rotate-180" : ""
-              } transition-all duration-300`}
+              }`}
             >
               <path
                 fillRule="evenodd"
@@ -161,43 +205,38 @@ export default function Gallery() {
 
         {/* DropDown Menu */}
         {isButtonClicked && (
-          <div className="w-fit absolute bottom-4 md:bottom-20 left-0 md:ml-5 mb-2 flex flex-col items-start bg-black rounded-md scale-50 md:scale-100 -translate-x-4 md:-translate-x-0 z-[10000]">
-            {galleryData?.gallery?.map((item) => (
-              <span
-                key={item.id}
-                className="w-full text-white px-4 py-2 hover:bg-gray-500  transition-all duration-300 cursor-pointer"
+          <div className="absolute bottom-32 left-4 z-50 bg-black/90 rounded-md overflow-hidden shadow-lg w-48">
+            {properties.map((property) => (
+              <button
+                key={property}
+                className={`w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 transition-colors cursor-pointer ${
+                  selectedButton === property ? "bg-gray-600" : ""
+                }`}
                 onClick={() => {
-                  setSelectedButton(item.name);
+                  setSelectedButton(property);
                   setIsButtonClicked(false);
-                  setBottomButtons(item.bottom_buttons);
-                  setSelectedBottomButton(item.bottom_buttons[0]);
+                  // You can add logic here to load property-specific gallery data
                 }}
               >
-                {item.name}
-              </span>
+                {property}
+              </button>
             ))}
           </div>
         )}
 
-        {/* Bottom Buttons swipeable */}
-        <div className="w-[100%] md:w-[50%] lg:w-fit mx-auto absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center justify-center gap-2 scale-50 md:scale-100 ">
-          {/* Left Arrow - visible if more than 5 buttons */}
-          {bottomButtons?.length > 5 && (
+        {/* Bottom Navigation */}
+        <div className="absolute bottom-0 left-0 right-0 z-30 p-4">
+          <div className="flex items-center justify-center space-x-4">
+            {/* Left Arrow */}
             <button
-              onClick={scrollLeft}
-              disabled={!canScrollLeft}
-              className={`z-10 p-2 rounded-full shadow-lg transition-colors ${
-                canScrollLeft
-                  ? "bg-black text-white hover:bg-white hover:text-black cursor-pointer"
-                  : "bg-gray-400 text-gray-600 cursor-not-allowed"
-              }`}
+              onClick={prevImage}
+              className="p-3 rounded-full transition-all duration-200 bg-black/50 hover:bg-black/70 text-white cursor-pointer"
             >
               <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
+                className="w-6 h-6"
                 fill="none"
-                viewBox="0 0 24 24"
                 stroke="currentColor"
+                viewBox="0 0 24 24"
               >
                 <path
                   strokeLinecap="round"
@@ -207,52 +246,41 @@ export default function Gallery() {
                 />
               </svg>
             </button>
-          )}
 
-          <div
-            ref={buttonContainerRef}
-            className="flex flex-row gap-2 overflow-hidden scroll-smooth"
-            style={{
-              width: "fit-content",
-              maxWidth: "calc((120px * 5) + (0.5rem * 4))", // Width for 5 buttons + 4 gaps
-            }}
-          >
-            {bottomButtons?.map((button) => (
-              <button
-                key={button.id}
-                className={`flex-shrink-0 w-fit px-4 py-2 font-normal text-sm rounded-full cursor-pointer ${
-                  selectedBottomButton.name === button.name
-                    ? "bg-white text-black shadow-md"
-                    : "bg-black text-white"
-                }`}
-                onClick={() => {
-                  setSelectedBottomButton(button);
-                  setCurrentImageUrl(button?.image?.url);
-                  setIsImageLoaded(false);
-                }}
-              >
-                {button.name}
-              </button>
-            ))}
-          </div>
+            {/* Gallery Thumbnails */}
+            <div className="flex space-x-2">
+              {bottomButtons?.map((button, index) => (
+                <button
+                  key={button.id}
+                  onClick={() => {
+                    setCurrentImageIndex(index);
+                  }}
+                  className={`relative w-16 h-12 rounded-lg overflow-hidden transition-all duration-200 ${
+                    index === currentImageIndex
+                      ? "ring-2 ring-white scale-110"
+                      : "opacity-60 hover:opacity-100"
+                  }`}
+                >
+                  <Image
+                    src={button?.image?.url || "/inventory_image.jpg"}
+                    alt={button?.image?.alternativeText || button.name}
+                    fill
+                    className="object-cover"
+                  />
+                </button>
+              ))}
+            </div>
 
-          {/* Right Arrow - visible if more than 5 buttons */}
-          {bottomButtons?.length > 5 && (
+            {/* Right Arrow */}
             <button
-              onClick={scrollRight}
-              disabled={!canScrollRight}
-              className={`z-10 p-2 rounded-full shadow-lg transition-colors ${
-                canScrollRight
-                  ? "bg-black text-white hover:bg-white hover:text-black cursor-pointer"
-                  : "bg-gray-400 text-gray-600 cursor-not-allowed"
-              }`}
+              onClick={nextImage}
+              className="p-3 rounded-full transition-all duration-200 bg-black/50 hover:bg-black/70 text-white cursor-pointer"
             >
               <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
+                className="w-6 h-6"
                 fill="none"
-                viewBox="0 0 24 24"
                 stroke="currentColor"
+                viewBox="0 0 24 24"
               >
                 <path
                   strokeLinecap="round"
@@ -262,7 +290,12 @@ export default function Gallery() {
                 />
               </svg>
             </button>
-          )}
+          </div>
+
+          {/* Image Counter */}
+          <div className="text-center mt-2 text-white text-sm">
+            {currentImageIndex + 1} of {bottomButtons?.length || 0}
+          </div>
         </div>
       </div>
     </>
