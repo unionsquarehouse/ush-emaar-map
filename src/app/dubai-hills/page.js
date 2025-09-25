@@ -22,17 +22,21 @@ export default function DubaiHillsPage() {
         <SimpleMap setSideBarButtonClicked={setSideBarButtonClicked} />
       )}
       {sideBarButtonClicked === 2 && (
-        <FloorPlans
-          setSideBarButtonClicked={setSideBarButtonClicked}
-          communitySlug="dubai-hills"
-        />
+        <div className="fixed inset-0 w-screen h-screen z-50">
+          <FloorPlans
+            setSideBarButtonClicked={setSideBarButtonClicked}
+            communitySlug="dubai-hills"
+          />
+        </div>
       )}
       {sideBarButtonClicked === 3 && <Gallery communitySlug="dubai-hills" />}
       {sideBarButtonClicked === 4 && (
-        <Brochure
-          setSideBarButtonClicked={setSideBarButtonClicked}
-          communitySlug="dubai-hills"
-        />
+        <div className="fixed inset-0 w-screen h-screen z-50">
+          <Brochure
+            setSideBarButtonClicked={setSideBarButtonClicked}
+            communitySlug="dubai-hills"
+          />
+        </div>
       )}
 
       <NavBar isFullScreen={isFullScreen} setIsFullScreen={setIsFullScreen} />

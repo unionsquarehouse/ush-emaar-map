@@ -6,10 +6,20 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "compress": "node scripts/compress.js",
+    "compress:images": "node scripts/compress-images.js",
+    "compress:pdfs": "node scripts/compress-pdfs.js",
+    "cleanup:backups": "node scripts/cleanup-backups.js",
+    "upload:cloudinary": "node scripts/upload-to-cloudinary.js",
+    "upload:missing": "node scripts/upload-missing-files.js",
+    "upload:raw-pdfs": "node scripts/upload-pdfs-as-raw.js",
+    "test:cloudinary": "node scripts/test-cloudinary-urls.js"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "cloudinary": "^2.5.0",
+    "dotenv": "^17.2.2",
     "framer-motion": "^12.5.0",
     "next": "15.2.1",
     "qs": "^6.14.0",
@@ -28,6 +38,12 @@
     "@tailwindcss/postcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "15.2.1",
+    "imagemin": "^8.0.1",
+    "imagemin-mozjpeg": "^10.0.0",
+    "imagemin-pngquant": "^9.0.2",
+    "imagemin-svgo": "^10.0.1",
+    "pdf-lib": "^1.17.1",
+    "sharp": "^0.33.5",
     "tailwindcss": "^4"
   }
 }

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import React, { useState, useRef, useEffect } from "react";
 import { useParams } from "next/navigation";
+import { getActualCloudinaryUrl, ensureClientSideDataLoaded } from "../../utils/cloudinary-mapping";
 
 export default function Gallery({ communitySlug, onPropertySelect }) {
   const [isButtonClicked, setIsButtonClicked] = useState(false);
@@ -236,12 +237,30 @@ export default function Gallery({ communitySlug, onPropertySelect }) {
         fileName = `${imageConfig.prefix}${imageNumber}.jpg`;
       }
 
-      images.push({
-        id: i,
-        name: `${propertyObj.displayName} - Image ${i}`,
-        url: `/communities/${propertyObj.community}/${propertyObj.name}/IMAGES/${fileName}`,
-        alt: `${propertyObj.displayName} - Image ${i}`,
-      });
+      const localPath = `/communities/${propertyObj.community}/${propertyObj.name}/IMAGES/${fileName}`;
+      const cloudinaryUrl = getActualCloudinaryUrl(localPath);
+      
+      // Only add images that exist in Cloudinary
+      if (cloudinaryUrl) {
+        images.push({
+          id: images.length + 1, // Use sequential ID based on available images
+          name: `${propertyObj.displayName} - Image ${images.length + 1}`,
+          url: cloudinaryUrl,
+          alt: `${propertyObj.displayName} - Image ${images.length + 1}`,
+        });
+      }
+    }
+
+    // If no images found in Cloudinary, show a placeholder
+    if (images.length === 0) {
+      return [
+        {
+          id: 1,
+          name: `${propertyObj.displayName} - No Images Available`,
+          url: "/inventory_image.jpg",
+          alt: `${propertyObj.displayName} - No Images Available`,
+        },
+      ];
     }
 
     return images;
@@ -315,11 +334,16 @@ export default function Gallery({ communitySlug, onPropertySelect }) {
   // Update gallery data when sub-property changes
   useEffect(() => {
     if (selectedProperty) {
-      const generatedData = generateGalleryData(selectedProperty);
-      setBottomButtons(generatedData);
-      setSelectedBottomButton(generatedData[0]);
-      setCurrentImageUrl(generatedData[0]?.url);
-      setCurrentImageIndex(0);
+      const loadGalleryData = async () => {
+        // Ensure client-side data is loaded
+        await ensureClientSideDataLoaded();
+        const generatedData = generateGalleryData(selectedProperty);
+        setBottomButtons(generatedData);
+        setSelectedBottomButton(generatedData[0]);
+        setCurrentImageUrl(generatedData[0]?.url);
+        setCurrentImageIndex(0);
+      };
+      loadGalleryData();
     }
   }, [selectedProperty]);
 

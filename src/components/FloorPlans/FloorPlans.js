@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+import { getActualCloudinaryUrl, ensureClientSideDataLoaded } from "../../utils/cloudinary-mapping";
 
 export default function FloorPlans({
   setSideBarButtonClicked,
@@ -258,25 +259,42 @@ export default function FloorPlans({
     const floorPlans = floorPlanFileMap[propertyObj.name];
 
     if (!floorPlans) {
-      return [
-        {
-          id: 1,
-          title: `${propertyObj.displayName} - Floor Plans`,
-          description: `${propertyObj.displayName} - Floor Plans`,
-          pdfUrl: `/communities/${propertyObj.community}/${
-            propertyObj.name
-          }/FLOORPLANS/${propertyObj.name.toUpperCase()}_FLOORPLANS.pdf`,
-        },
-      ];
+      const localPath = `/communities/${propertyObj.community}/${propertyObj.name}/FLOORPLANS/${propertyObj.name.toUpperCase()}_FLOORPLANS.pdf`;
+      const cloudinaryUrl = getActualCloudinaryUrl(localPath);
+      
+      // Only return floor plan if it exists in Cloudinary
+      if (cloudinaryUrl) {
+        return [
+          {
+            id: 1,
+            title: `${propertyObj.displayName} - Floor Plans`,
+            description: `${propertyObj.displayName} - Floor Plans`,
+            pdfUrl: cloudinaryUrl,
+          },
+        ];
+      }
+      
+      // Return empty array if floor plan not found in Cloudinary
+      return [];
     }
 
-    // Generate tabs for each floor plan
-    return floorPlans.map((plan, index) => ({
-      id: index + 1,
-      title: plan.title,
-      description: `${propertyObj.displayName} - ${plan.title}`,
-      pdfUrl: `/communities/${propertyObj.community}/${propertyObj.name}/FLOORPLANS/${plan.file}`,
-    }));
+    // Generate tabs for each floor plan, only including those that exist in Cloudinary
+    const availableFloorPlans = [];
+    floorPlans.forEach((plan, index) => {
+      const localPath = `/communities/${propertyObj.community}/${propertyObj.name}/FLOORPLANS/${plan.file}`;
+      const cloudinaryUrl = getActualCloudinaryUrl(localPath);
+      
+      if (cloudinaryUrl) {
+        availableFloorPlans.push({
+          id: availableFloorPlans.length + 1,
+          title: plan.title,
+          description: `${propertyObj.displayName} - ${plan.title}`,
+          pdfUrl: cloudinaryUrl,
+        });
+      }
+    });
+    
+    return availableFloorPlans;
   };
 
   const [floorPlanTabs, setFloorPlanTabs] = useState([]);
@@ -284,9 +302,14 @@ export default function FloorPlans({
   // Update floor plan tabs when property changes
   useEffect(() => {
     if (selectedProperty) {
-      const generatedTabs = generateFloorPlanTabs(selectedProperty);
-      setFloorPlanTabs(generatedTabs);
-      setSelectedTab(0); // Reset to first tab
+      const loadFloorPlans = async () => {
+        // Ensure client-side data is loaded
+        await ensureClientSideDataLoaded();
+        const generatedTabs = generateFloorPlanTabs(selectedProperty);
+        setFloorPlanTabs(generatedTabs);
+        setSelectedTab(0); // Reset to first tab
+      };
+      loadFloorPlans();
     }
   }, [selectedProperty]);
 
@@ -303,8 +326,9 @@ export default function FloorPlans({
     };
   }, [isDropdownOpen]);
 
+  
   return (
-    <div className="w-full h-screen bg-gray-900 relative overflow-hidden">
+    <div className="w-screen h-screen bg-gray-900 relative fixed inset-0">
       {/* Property Dropdown */}
       <div className="absolute bottom-4 right-4 z-50 dropdown-container">
         <button
@@ -364,16 +388,54 @@ export default function FloorPlans({
         </div>
       )}
 
-      {/* PDF Viewer */}
-      <div className="absolute inset-0 w-full h-full">
-        {floorPlanTabs.length > 0 && floorPlanTabs[selectedTab] && (
-          <iframe
-            src={`${floorPlanTabs[selectedTab].pdfUrl}#toolbar=0&navpanes=0&scrollbar=0&statusbar=0&messages=0&scrollbar=0`}
-            className="w-full h-full border-0"
-            title={`${floorPlanTabs[selectedTab].title} PDF`}
-            style={{ width: "100vw", height: "100vh" }}
-            allowFullScreen
-          />
+      {/* Floor Plan Viewer */}
+      <div className="absolute inset-0 w-screen h-screen">
+        {floorPlanTabs.length > 0 && floorPlanTabs[selectedTab] ? (
+          <div className="w-screen h-screen">
+            <div className="w-screen h-screen overflow-auto bg-white">
+              {floorPlanTabs[selectedTab].pdfUrl.includes('/raw/upload/') ? (
+                // Display as PDF if it's a raw upload
+                <iframe
+                  src={`${floorPlanTabs[selectedTab].pdfUrl}#toolbar=0&navpanes=0&scrollbar=0&statusbar=0&messages=0&scrollbar=0`}
+                  className="w-full h-screen border-0"
+                  title={`${floorPlanTabs[selectedTab].title} Floor Plan PDF`}
+                  style={{ 
+                    width: "100%", 
+                    height: "100vh",
+                    border: "none"
+                  }}
+                  allowFullScreen
+                />
+              ) : (
+                // Display as image if it's a converted upload
+                <img
+                  src={floorPlanTabs[selectedTab].pdfUrl}
+                  alt={`${floorPlanTabs[selectedTab].title} Floor Plan`}
+                  className="w-full h-auto"
+                  style={{ 
+                    width: "100%", 
+                    height: "auto",
+                    minHeight: "100vh",
+                    objectFit: "contain"
+                  }}
+                />
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center w-full h-full text-white">
+            <div className="text-center">
+              <p className="text-lg mb-2">No floor plans available</p>
+              <p className="text-sm text-gray-300">
+                {floorPlanTabs.length === 0 ? 'No floor plans found for this property' : 'Loading floor plans...'}
+              </p>
+              <p className="text-xs text-gray-400 mt-2">
+                Selected property: {selectedProperty?.name || 'None'} | 
+                Tabs: {floorPlanTabs.length} | 
+                Selected tab: {selectedTab}
+              </p>
+            </div>
+          </div>
         )}
       </div>
 

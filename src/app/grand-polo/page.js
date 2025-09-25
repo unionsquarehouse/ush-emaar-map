@@ -22,17 +22,21 @@ export default function GrandPoloPage() {
         <SimpleMap setSideBarButtonClicked={setSideBarButtonClicked} />
       )}
       {sideBarButtonClicked === 2 && (
-        <FloorPlans
-          setSideBarButtonClicked={setSideBarButtonClicked}
-          communitySlug="grand-polo"
-        />
+        <div className="fixed inset-0 w-screen h-screen z-50">
+          <FloorPlans
+            setSideBarButtonClicked={setSideBarButtonClicked}
+            communitySlug="grand-polo"
+          />
+        </div>
       )}
       {sideBarButtonClicked === 3 && <Gallery communitySlug="grand-polo" />}
       {sideBarButtonClicked === 4 && (
-        <Brochure
-          setSideBarButtonClicked={setSideBarButtonClicked}
-          communitySlug="grand-polo"
-        />
+        <div className="fixed inset-0 w-screen h-screen z-50">
+          <Brochure
+            setSideBarButtonClicked={setSideBarButtonClicked}
+            communitySlug="grand-polo"
+          />
+        </div>
       )}
 
       <NavBar isFullScreen={isFullScreen} setIsFullScreen={setIsFullScreen} />

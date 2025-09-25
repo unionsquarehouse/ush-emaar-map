@@ -4,6 +4,7 @@ import "./globals.css";
 import "react-tooltip/dist/react-tooltip.css";
 import Script from "next/script";
 import { AppContextProvider } from "@/context/appContext";
+import CloudinaryDataLoader from "@/components/CloudinaryDataLoader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -62,7 +63,10 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${playfairDisplay.variable} ${poppins.variable} antialiased`}
       >
-        <AppContextProvider>{children}</AppContextProvider>
+        <AppContextProvider>
+          <CloudinaryDataLoader />
+          {children}
+        </AppContextProvider>
       </body>
     </html>
   );
