@@ -1,293 +1,294 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import { useParams } from "next/navigation";
 
-export default function FloorPlans({ setSideBarButtonClicked }) {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+export default function FloorPlans({
+  setSideBarButtonClicked,
+  communitySlug,
+  onPropertySelect,
+}) {
+  const [selectedTab, setSelectedTab] = useState(0);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [selectedSubProperty, setSelectedSubProperty] = useState(null);
+  const [selectedProperty, setSelectedProperty] = useState(null);
 
   const { slug } = useParams();
 
-  // Get sub-properties based on current URL slug
-  const getSubProperties = (slug) => {
-    const subPropertiesData = {
-      "the-oasis": ["Oasis Phase 1", "Oasis Phase 2", "Oasis Phase 3"],
-      "grand-polo": ["GP1", "GP2", "GP3"],
-      "emaar-south": ["ES1", "ES2", "ES3"],
-      "dubai-hills": ["DH1", "DH2", "DH3"],
-      "expo-living": ["EL1", "EL2", "EL3"],
-      "dubai-creek-harbour": ["DCH1", "DCH2", "DCH3"],
-      "rashid-yachts": ["RY1", "RY2", "RY3"],
-      "the-valley": ["TV1", "TV2", "TV3"],
+  // Get community name from URL slug or prop
+  const getCommunityName = (slug) => {
+    const communityMap = {
+      "grand-polo": "grand-polo",
+      "emaar-south": "emaar-south",
+      "dubai-hills": "dubai-hills",
+      "expo-living": "expo-living",
+      "dubai-creek-harbour": "dubai-creek-harbour",
+      "rashid-yachts": "rashid-yachts",
+      "the-valley": "the-valley",
     };
-    return subPropertiesData[slug] || ["Default 1", "Default 2", "Default 3"];
+    return communityMap[slug] || "grand-polo";
   };
 
-  const subProperties = getSubProperties(slug);
+  // Get all properties from all communities
+  const getAllProperties = () => {
+    const allProperties = [
+      // Grand Polo properties
+      {
+        name: "chevalia-estate-2",
+        community: "grand-polo",
+        displayName: "Chevalia Estate 2",
+      },
+      { name: "montura-3", community: "grand-polo", displayName: "Montura 3" },
+      { name: "selvara", community: "grand-polo", displayName: "Selvara" },
+      { name: "selvara-2", community: "grand-polo", displayName: "Selvara 2" },
+      { name: "selvara-3", community: "grand-polo", displayName: "Selvara 3" },
+      { name: "selvara-4", community: "grand-polo", displayName: "Selvara 4" },
 
-  // Set default selected sub-property
-  useEffect(() => {
-    if (subProperties.length > 0 && !selectedSubProperty) {
-      setSelectedSubProperty(subProperties[0]);
-    }
-  }, [subProperties, selectedSubProperty]);
+      // Emaar South properties
+      {
+        name: "golf-acres",
+        community: "emaar-south",
+        displayName: "Golf Acres",
+      },
+      { name: "golf-dale", community: "emaar-south", displayName: "Golf Dale" },
+      {
+        name: "golf-meadow",
+        community: "emaar-south",
+        displayName: "Golf Meadow",
+      },
+      {
+        name: "golf-point",
+        community: "emaar-south",
+        displayName: "Golf Point",
+      },
+      {
+        name: "golf-verge",
+        community: "emaar-south",
+        displayName: "Golf Verge",
+      },
 
-  // Generate dummy floor plan data based on selected sub-property
-  const generateFloorPlanData = (subProperty) => {
-    const baseFloorPlans = [
+      // Dubai Hills properties
       {
-        id: 1,
-        src: "/inventory_image.jpg",
-        alt: "Floor Plan 1",
-        title: "2 Bedroom",
-        description: "Spacious 2 bedroom layout",
+        name: "golf-hillside",
+        community: "dubai-hills",
+        displayName: "Golf Hillside",
       },
       {
-        id: 2,
-        src: "/inventory_image.jpg",
-        alt: "Floor Plan 2",
-        title: "3 Bedroom",
-        description: "Luxurious 3 bedroom layout",
+        name: "hillsedge",
+        community: "dubai-hills",
+        displayName: "Hillsedge Tower A",
+      },
+     
+      { name: "parkwood", community: "dubai-hills", displayName: "Parkwood" },
+      { name: "rosehill", community: "dubai-hills", displayName: "Rosehill" },
+      {
+        name: "vida-residences-hillside",
+        community: "dubai-hills",
+        displayName: "Vida Residences Hillside",
+      },
+
+      // Expo Living properties
+      {
+        name: "terra-heights",
+        community: "expo-living",
+        displayName: "Terra Heights",
+      },
+
+      // Dubai Creek Harbour properties
+      {
+        name: "albero",
+        community: "dubai-creek-harbour",
+        displayName: "Albero",
+      },
+      { name: "altan", community: "dubai-creek-harbour", displayName: "Altan" },
+      // {
+      //   name: "montiva",
+      //   community: "dubai-creek-harbour",
+      //   displayName: "Montiva",
+      // },
+      { name: "silva", community: "dubai-creek-harbour", displayName: "Silva" },
+
+      // Rashid Yachts properties
+      {
+        name: "baystar-by-vida",
+        community: "rashid-yachts",
+        displayName: "Baystar By Vida",
       },
       {
-        id: 3,
-        src: "/inventory_image.jpg",
-        alt: "Floor Plan 3",
-        title: "4 Bedroom",
-        description: "Premium 4 bedroom layout",
+        name: "pier-point-2",
+        community: "rashid-yachts",
+        displayName: "Pier Point 2",
       },
-      {
-        id: 4,
-        src: "/inventory_image.jpg",
-        alt: "Floor Plan 4",
-        title: "Penthouse",
-        description: "Exclusive penthouse layout",
-      },
+      { name: "sera-2", community: "rashid-yachts", displayName: "Sera 2" },
+
+      // The Valley properties
+      { name: "rivera", community: "the-valley", displayName: "Rivera" },
+      { name: "vindera", community: "the-valley", displayName: "Vindera" },
     ];
 
-    return baseFloorPlans.map((plan) => ({
-      ...plan,
-      title: `${subProperty} - ${plan.title}`,
-      alt: `${subProperty} - ${plan.alt}`,
-      description: `${subProperty} - ${plan.description}`,
+    return allProperties;
+  };
+
+  const communityName = getCommunityName(communitySlug || slug);
+  const allProperties = getAllProperties();
+
+  // Filter properties by current community
+  const communityProperties = allProperties.filter(
+    (property) => property.community === communityName
+  );
+
+  // Set default selected property from filtered community
+  useEffect(() => {
+    if (communityProperties.length > 0 && !selectedProperty) {
+      setSelectedProperty(communityProperties[0]);
+    }
+  }, [communityProperties, selectedProperty]);
+
+  // Notify parent component when property changes
+  useEffect(() => {
+    if (selectedProperty && onPropertySelect) {
+      onPropertySelect(selectedProperty);
+    }
+  }, [selectedProperty, onPropertySelect]);
+
+  // Generate floor plan tabs based on selected property and actual files
+  const generateFloorPlanTabs = (propertyObj) => {
+    // Map property names to their actual floor plan files
+    const floorPlanFileMap = {
+      // Grand Polo
+      "chevalia-estate-2": [
+        {
+          title: "Chevalia Estate 2",
+          file: "CHEVALIA-ESTATE2_GP_FLOORPLANS.pdf",
+        },
+      ],
+      "montura-3": [{ title: "Montura 3", file: "FLOOR_PLANS_MONTURA3_GP.pdf" }],
+      selvara: [{ title: "Selvara", file: "SELVARA_GP_FLOORPLAN.pdf" }],
+      "selvara-2": [{ title: "Selvara 2", file: "SELVARA_2_GP_FLOORPLAN.pdf" }],
+      "selvara-3": [{ title: "Selvara 3", file: "SELVARA3_GP_FLOORPLAN.pdf" }],
+      "selvara-4": [{ title: "Selvara 4", file: "SELVARA3_GP_FLOORPLAN.pdf" }],
+
+      // Dubai Creek Harbour
+      albero: [{ title: "Albero", file: "ALBERO_DCH_FLOORPLANS.pdf" }],
+      altan: [{ title: "Altan", file: "ALTAN_DCH_FLOORPLANS.pdf" }],
+      montiva: [{ title: "Montiva", file: "MONTIVA_DCH_FLOORPLANS.pdf" }],
+      silva: [{ title: "Silva", file: "SILVA_DCH_FLOORPLANS.pdf" }],
+
+      // Dubai Hills
+      "golf-hillside": [
+        { title: "Golf Hillside", file: "GHS_DHE_FLOORPLANS.pdf" },
+      ],
+      hillsedge: [
+        { title: "Tower A", file: "HILLSEDGE_DHE_FLOORPLAN-TOWER A.pdf" },
+      ],
+      
+      parkwood: [{ title: "Parkwood", file: "PARKWOOD_DHE_FLOORPLANS.pdf" }],
+      rosehill: [
+        { title: "Block A", file: "ROSEHILL_DHE_BLOCK_A_FLOOR_PLAN.pdf" },
+        { title: "Block B", file: "ROSEHILL_DHE_BLOCK_B_FLOOR_PLAN.pdf" },
+        { title: "Block C", file: "ROSEHILL_DHE_BLOCK_C_FLOOR_PLAN.pdf" },
+      ],
+      "vida-residences-hillside": [
+        {
+          title: "Vida Residences",
+          file: "VIDA_RESIDENCES_HILLSIDE_DHE_FLOORPLAN.pdf",
+        },
+      ],
+
+      // Emaar South
+      "golf-acres": [
+        { title: "Golf Acres", file: "GOLF_ACRES_FLOOR_PLANS.pdf" },
+      ],
+      "golf-dale": [
+        { title: "Golf Dale", file: "GOLF_DALE_ES_FLOOR_PLANS.pdf" },
+      ],
+      "golf-meadow": [
+        { title: "Golf Meadow", file: "GOLF_MEADOW_FLOOR_PLANS.pdf" },
+      ],
+      "golf-point": [
+        { title: "Tower 1", file: "ES_GOLFPOINT_TOWER1_FLOORPLANS.pdf" },
+        { title: "Tower 2", file: "GOLFPOINT_ES_FLOOR_PLANS_TOWER_2.pdf" },
+      ],
+      "golf-verge": [
+        { title: "Building A", file: "GOLF-VERGE_BLDG-A_FLOORPLANS.pdf" },
+        { title: "Building B", file: "GOLF-VERGE_BLDG-B_FLOORPLANS.pdf" },
+        { title: "Building C", file: "GOLF-VERGE_BLDG-C_FLOORPLANS.pdf" },
+      ],
+
+      // Expo Living
+      "terra-heights": [
+        {
+          title: "Building 1",
+          file: "TERRAHEIGHTS_XL_FLOORPLAN_T01.pdf",
+        },
+        {
+          title: "Building 2",
+          file: "TERRAHEIGHTS_XL_FLOORPLAN_T02.pdf",
+        },
+        {
+          title: "Building 3",
+          file: "TERRAHEIGHTS_XL_FLOORPLAN_03.pdf",
+        },
+        {
+          title: "Building 4",
+          file: "TERRAHEIGHTS_XL_FLOORPLAN_T04.pdf",
+        },
+      ],
+
+      // Rashid Yachts
+      "baystar-by-vida": [
+        { title: "Type 1", file: "BAYSTAR-BY-VIDA_T1_RYM_FLOORPLANS.pdf" },
+        { title: "Type 2", file: "BAYSTAR-BY-VIDA_T2_RYM_FLOORPLANS.pdf" },
+      ],
+      "pier-point-2": [
+        { title: "Pier Point 1", file: "PIERPOINT1_FLOOR_PLAN_RYM.pdf" },
+        { title: "Pier Point 2", file: "PIERPOINT2_FLOOR_PLAN_RYM.pdf" },
+        { title: "Townhouse", file: "PIERPOINT2_FLOOR_PLAN_TOWNHOUSE_RYM.pdf" },
+      ],
+      "sera-2": [
+        { title: "Type A", file: "SERA2_RYM_FLOORPLANS-A.pdf" },
+        { title: "Type B", file: "SERA2_RYM_FLOORPLANS_B.pdf" },
+        { title: "Townhouse", file: "SERA2_RYM_FLOORPLANS-TOWNHOUSE.pdf" },
+      ],
+
+      // The Valley
+      rivera: [{ title: "Rivera", file: "RIVERA_TV_FLOOR_PLANS.pdf" }],
+      vindera: [{ title: "Vindera", file: "VINDERA_TH_FLOORPLANS.pdf" }],
+    };
+
+    const floorPlans = floorPlanFileMap[propertyObj.name];
+
+    if (!floorPlans) {
+      return [
+        {
+          id: 1,
+          title: `${propertyObj.displayName} - Floor Plans`,
+          description: `${propertyObj.displayName} - Floor Plans`,
+          pdfUrl: `/communities/${propertyObj.community}/${
+            propertyObj.name
+          }/FLOORPLANS/${propertyObj.name.toUpperCase()}_FLOORPLANS.pdf`,
+        },
+      ];
+    }
+
+    // Generate tabs for each floor plan
+    return floorPlans.map((plan, index) => ({
+      id: index + 1,
+      title: plan.title,
+      description: `${propertyObj.displayName} - ${plan.title}`,
+      pdfUrl: `/communities/${propertyObj.community}/${propertyObj.name}/FLOORPLANS/${plan.file}`,
     }));
   };
 
-  // Property-specific floor plan data (keeping for backward compatibility)
-  const getFloorPlansForProperty = (property) => {
-    const floorPlanData = {
-      "Grand Polo": [
-        {
-          id: 1,
-          src: "/inventory_image.jpg",
-          alt: "Grand Polo 2BR",
-          title: "2 Bedroom Apartment",
-          description: "Modern 2 bedroom apartment with city views",
-        },
-        {
-          id: 2,
-          src: "/inventory_image.jpg",
-          alt: "Grand Polo 3BR",
-          title: "3 Bedroom Apartment",
-          description: "Spacious 3 bedroom apartment with balcony",
-        },
-        {
-          id: 3,
-          src: "/inventory_image.jpg",
-          alt: "Grand Polo 4BR",
-          title: "4 Bedroom Apartment",
-          description: "Luxury 4 bedroom apartment with premium finishes",
-        },
-      ],
-      "Emaar South": [
-        {
-          id: 1,
-          src: "/inventory_image.jpg",
-          alt: "Emaar South Villa",
-          title: "3 Bedroom Villa",
-          description: "Contemporary villa with private garden",
-        },
-        {
-          id: 2,
-          src: "/inventory_image.jpg",
-          alt: "Emaar South Townhouse",
-          title: "4 Bedroom Townhouse",
-          description: "Modern townhouse with rooftop terrace",
-        },
-      ],
-      "Dubai Hills": [
-        {
-          id: 1,
-          src: "/inventory_image.jpg",
-          alt: "Dubai Hills Villa",
-          title: "3 Bedroom Villa",
-          description: "Golf course villa with stunning views",
-        },
-        {
-          id: 2,
-          src: "/inventory_image.jpg",
-          alt: "Dubai Hills Apartment",
-          title: "2 Bedroom Apartment",
-          description: "Modern apartment with golf course access",
-        },
-      ],
-      "Expo Living": [
-        {
-          id: 1,
-          src: "/inventory_image.jpg",
-          alt: "Expo Living Studio",
-          title: "Studio Apartment",
-          description: "Compact studio with modern amenities",
-        },
-        {
-          id: 2,
-          src: "/inventory_image.jpg",
-          alt: "Expo Living 1BR",
-          title: "1 Bedroom Apartment",
-          description: "Comfortable 1 bedroom with city views",
-        },
-        {
-          id: 3,
-          src: "/inventory_image.jpg",
-          alt: "Expo Living 2BR",
-          title: "2 Bedroom Apartment",
-          description: "Spacious 2 bedroom with premium finishes",
-        },
-      ],
-      "Dubai Creek Harbour": [
-        {
-          id: 1,
-          src: "/inventory_image.jpg",
-          alt: "Creek Harbour Villa",
-          title: "4 Bedroom Villa",
-          description: "Waterfront villa with marina views",
-        },
-        {
-          id: 2,
-          src: "/inventory_image.jpg",
-          alt: "Creek Harbour Apartment",
-          title: "3 Bedroom Apartment",
-          description: "Luxury apartment with harbor views",
-        },
-      ],
-      "Rashid Yachts": [
-        {
-          id: 1,
-          src: "/inventory_image.jpg",
-          alt: "Rashid Yachts Villa",
-          title: "5 Bedroom Villa",
-          description: "Exclusive waterfront villa with yacht access",
-        },
-        {
-          id: 2,
-          src: "/inventory_image.jpg",
-          alt: "Rashid Yachts Penthouse",
-          title: "Penthouse",
-          description: "Ultra-luxury penthouse with panoramic sea views",
-        },
-      ],
-      "The Valley": [
-        {
-          id: 1,
-          src: "/inventory_image.jpg",
-          alt: "The Valley Villa",
-          title: "3 Bedroom Villa",
-          description: "Modern villa in serene valley setting",
-        },
-        {
-          id: 2,
-          src: "/inventory_image.jpg",
-          alt: "The Valley Townhouse",
-          title: "4 Bedroom Townhouse",
-          description: "Contemporary townhouse with mountain views",
-        },
-      ],
-    };
-    return floorPlanData[property] || floorPlanData["The Oasis"];
-  };
+  const [floorPlanTabs, setFloorPlanTabs] = useState([]);
 
-  const [floorPlanImages, setFloorPlanImages] = useState([]);
-
-  // Update floor plan data when sub-property changes
+  // Update floor plan tabs when property changes
   useEffect(() => {
-    if (selectedSubProperty) {
-      const generatedData = generateFloorPlanData(selectedSubProperty);
-      setFloorPlanImages(generatedData);
-      setCurrentImageIndex(0);
+    if (selectedProperty) {
+      const generatedTabs = generateFloorPlanTabs(selectedProperty);
+      setFloorPlanTabs(generatedTabs);
+      setSelectedTab(0); // Reset to first tab
     }
-  }, [selectedSubProperty]);
-
-  const nextImage = () => {
-    if (floorPlanImages.length > 0) {
-      setCurrentImageIndex((prevIndex) =>
-        prevIndex === floorPlanImages.length - 1 ? 0 : prevIndex + 1
-      );
-    }
-  };
-
-  const prevImage = () => {
-    if (floorPlanImages.length > 0) {
-      setCurrentImageIndex((prevIndex) =>
-        prevIndex === 0 ? floorPlanImages.length - 1 : prevIndex - 1
-      );
-    }
-  };
-
-  const goToImage = (index) => {
-    if (
-      floorPlanImages.length > 0 &&
-      index >= 0 &&
-      index < floorPlanImages.length
-    ) {
-      setCurrentImageIndex(index);
-    }
-  };
-
-  // Touch/swipe functionality
-  const [touchStart, setTouchStart] = useState(null);
-  const [touchEnd, setTouchEnd] = useState(null);
-
-  const minSwipeDistance = 50;
-
-  const onTouchStart = (e) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
-  };
-
-  const onTouchMove = (e) => {
-    setTouchEnd(e.targetTouches[0].clientX);
-  };
-
-  const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-
-    if (isLeftSwipe) {
-      nextImage();
-    } else if (isRightSwipe) {
-      prevImage();
-    }
-  };
-
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyPress = (e) => {
-      if (e.key === "ArrowLeft") {
-        prevImage();
-      } else if (e.key === "ArrowRight") {
-        nextImage();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, []);
+  }, [selectedProperty]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -296,7 +297,6 @@ export default function FloorPlans({ setSideBarButtonClicked }) {
         setIsDropdownOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -304,51 +304,29 @@ export default function FloorPlans({ setSideBarButtonClicked }) {
   }, [isDropdownOpen]);
 
   return (
-    <div className="w-full h-screen bg-gray-900 relative">
-      {/* Main Gallery */}
-      <div className="absolute inset-0 w-full h-full">
-        {/* Image Container */}
-        <div
-          className="absolute inset-0 w-full h-full"
-          onTouchStart={onTouchStart}
-          onTouchMove={onTouchMove}
-          onTouchEnd={onTouchEnd}
-        >
-          {floorPlanImages.length > 0 && floorPlanImages[currentImageIndex] && (
-            <Image
-              src={floorPlanImages[currentImageIndex].src}
-              alt={floorPlanImages[currentImageIndex].alt}
-              fill
-              className="object-cover"
-              priority
-            />
-          )}
-        </div>
-      </div>
-
+    <div className="w-full h-screen bg-gray-900 relative overflow-hidden">
       {/* Property Dropdown */}
-      <div className="absolute bottom-20 left-4 z-50 dropdown-container">
+      <div className="absolute bottom-4 right-4 z-50 dropdown-container">
         <button
-          className="bg-black/80 text-white px-4 py-2 rounded-md flex items-center gap-2 text-sm font-normal cursor-pointer"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             setIsDropdownOpen(!isDropdownOpen);
           }}
+          className="bg-black/80 text-white px-4 py-2 rounded-md flex items-center gap-2 text-sm font-normal cursor-pointer"
         >
-          {selectedSubProperty || "Select Property"}
+          {selectedProperty?.displayName || "Select Property"}
           <svg
-            xmlns="http://www.w3.org/2000/svg"
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
             viewBox="0 0 24 24"
-            fill="currentColor"
-            className={`w-4 h-4 transition-transform duration-300 ${
-              isDropdownOpen ? "rotate-180" : ""
-            }`}
           >
             <path
-              fillRule="evenodd"
-              d="M11.47 7.72a.75.75 0 0 1 1.06 0l7.5 7.5a.75.75 0 1 1-1.06 1.06L12 9.31l-6.97 6.97a.75.75 0 0 1-1.06-1.06l7.5-7.5Z"
-              clipRule="evenodd"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
             />
           </svg>
         </button>
@@ -356,98 +334,83 @@ export default function FloorPlans({ setSideBarButtonClicked }) {
 
       {/* Dropdown Menu */}
       {isDropdownOpen && (
-        <div className="absolute bottom-32 left-4 z-50 bg-black/90 rounded-md overflow-hidden shadow-lg dropdown-container w-48">
-          {subProperties.map((subProperty) => (
+        <div className="absolute bottom-16 right-4 z-50 bg-black/90 rounded-md overflow-hidden shadow-lg dropdown-container w-64 max-h-80 overflow-y-auto">
+          {communityProperties.map((property) => (
             <button
-              key={subProperty}
-              className={`w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 transition-colors cursor-pointer ${
-                selectedSubProperty === subProperty ? "bg-gray-600" : ""
-              }`}
+              key={`${property.community}-${property.name}`}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                setSelectedSubProperty(subProperty);
+                setSelectedProperty(property);
                 setIsDropdownOpen(false);
               }}
+              className={`w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 transition-colors cursor-pointer ${
+                selectedProperty?.name === property.name &&
+                selectedProperty?.community === property.community
+                  ? "bg-gray-600"
+                  : ""
+              }`}
             >
-              {subProperty}
+              <div className="flex flex-col">
+                <span className="font-medium">{property.displayName}</span>
+                <span className="text-xs text-gray-400">
+                  {property.community
+                    .replace(/-/g, " ")
+                    .replace(/\b\w/g, (l) => l.toUpperCase())}
+                </span>
+              </div>
             </button>
           ))}
         </div>
       )}
 
-      {/* Thumbnail Navigation */}
-      <div className="absolute bottom-0 left-0 right-0 z-30 p-4">
-        <div className="flex items-center justify-center space-x-4">
-          {/* Left Arrow */}
-          <button
-            onClick={prevImage}
-            className="bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all duration-200"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-          </button>
+      {/* PDF Viewer */}
+      <div className="absolute inset-0 w-full h-full">
+        {floorPlanTabs.length > 0 && floorPlanTabs[selectedTab] && (
+          <iframe
+            src={`${floorPlanTabs[selectedTab].pdfUrl}#toolbar=0&navpanes=0&scrollbar=0&statusbar=0&messages=0&scrollbar=0`}
+            className="w-full h-full border-0"
+            title={`${floorPlanTabs[selectedTab].title} PDF`}
+            style={{ width: "100vw", height: "100vh" }}
+            allowFullScreen
+          />
+        )}
+      </div>
 
-          {/* Thumbnails */}
+      {/* Floor Plan Tabs - Bottom Left */}
+      {floorPlanTabs.length > 1 && (
+        <div className="absolute bottom-4 left-4 z-[60]">
           <div className="flex space-x-2">
-            {floorPlanImages.length > 0 &&
-              floorPlanImages.map((image, index) => (
-                <button
-                  key={image.id}
-                  onClick={() => goToImage(index)}
-                  className={`relative w-16 h-12 rounded-lg overflow-hidden transition-all duration-200 ${
-                    index === currentImageIndex
-                      ? "ring-2 ring-white scale-110"
-                      : "opacity-60 hover:opacity-100"
-                  }`}
-                >
-                  <Image
-                    src={image.src}
-                    alt={image.alt}
-                    fill
-                    className="object-cover"
-                  />
-                </button>
-              ))}
+            {floorPlanTabs.map((tab, index) => (
+              <button
+                key={index}
+                onClick={() => {
+                  console.log("Tab clicked:", tab.title, "Index:", index);
+                  setSelectedTab(index);
+                }}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 backdrop-blur-md border shadow-lg ${
+                  selectedTab === index
+                    ? "bg-white/30 text-white border-white/50 shadow-xl"
+                    : "bg-white/20 text-white/90 border-white/30 hover:bg-white/25 hover:text-white"
+                }`}
+              >
+                {tab.title}
+              </button>
+            ))}
           </div>
-
-          {/* Right Arrow */}
-          <button
-            onClick={nextImage}
-            className="bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all duration-200"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-          </button>
         </div>
+      )}
 
-        {/* Image Counter */}
-        <div className="text-center mt-2 text-white text-sm">
-          {floorPlanImages.length > 0
-            ? `${currentImageIndex + 1} of ${floorPlanImages.length}`
-            : "0 of 0"}
+      {/* Enhanced Mouse Scroll Indicator */}
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-50">
+        <div className="flex flex-col items-center">
+          {/* Mouse Icon with Enhanced Visibility */}
+          <div className="relative">
+            {/* Mouse Icon with Strong Contrast */}
+            <div className="w-8 h-12 border-2 border-gray-400 rounded-full flex justify-center bg-white/90 backdrop-blur-sm shadow-2xl shadow-black/50">
+              <div className="w-2 h-3 bg-gray-600 rounded-full mt-3 animate-pulse shadow-lg"></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

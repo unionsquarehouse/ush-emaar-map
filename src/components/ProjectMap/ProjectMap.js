@@ -621,6 +621,22 @@ export default function ProjectMap({ handleMainLocationClick }) {
                                     index + 1
                                   } clicked: ${propertyName}`
                                 );
+
+                                // Navigate to the property page
+                                const propertySlugs = [
+                                  "expo-living", // 1 - Expo Living
+                                  "rashid-yachts", // 2 - Rashid Yachts
+                                  "emaar-south", // 3 - Emaar South
+                                  "the-valley", // 4 - The Valley
+                                  "dubai-hills", // 5 - Dubai Hills
+                                  "grand-polo", // 6 - Grand Polo
+                                  "dubai-creek-harbour", // 7 - Dubai Creek Harbour
+                                ];
+
+                                const slug = propertySlugs[index];
+                                if (slug) {
+                                  router.push(`/${slug}`);
+                                }
                               }
 
                               function handleMouseEnter(e) {
