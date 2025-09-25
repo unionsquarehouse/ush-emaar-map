@@ -7,8 +7,6 @@ import ThreeSixtyCard from "../ThreeSixtyCard/ThreeSixtyCard";
 import { AnimatePresence } from "framer-motion";
 import ThreeSixtyView from "../ThreeSixtyView/ThreeSixtyView";
 import { AppContext } from "@/context/appContext";
-import { FETCH_MASTER_PLAN } from "@/constants/constants";
-import qs from "qs";
 import MasterPlanInfoCard from "../MasterPlanInfoCard/MasterPlanInfoCard";
 
 export default function SubCommunity({ setShowSubCommunity, documentId }) {
@@ -69,32 +67,18 @@ export default function SubCommunity({ setShowSubCommunity, documentId }) {
   }, [showThreeSixtyView]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const query = qs.stringify({
-        populate: [
-          "master_plan_map_image",
-          "master_plan_locator",
-          "master_plan_locator.locator",
-          "master_plan_three_sity_marker",
-          "master_plan_three_sity_marker.image",
-          "master_plan_three_sity_marker.card_image",
-          "master_plan_location_marker",
-          "master_plan_locator_data_fields",
-          "master_plan_locator_data_fields.master_plan_locator",
-          "master_plan_locator_data_fields.master_plan_locator.locator",
-          "master_plan_locator_data_fields.master_plan_locator_card",
-          "master_plan_locator_data_fields.master_plan_locator_card.card_image",
-        ],
-        filters: {
-          documentId: documentId,
-        },
-        fields: ["id", "master_plan_location_highlight_svg"],
-      });
-      const data = await fetch(`${FETCH_MASTER_PLAN}?${query}`);
-      const project = await data.json();
-      setData(project.data[0]);
-    };
-    fetchData();
+    // Set dummy data instead of API call
+    setData({
+      id: 1,
+      master_plan_map_image: {
+        url: "/inventory_image.jpg",
+      },
+      master_plan_locator: [],
+      master_plan_three_sity_marker: [],
+      master_plan_location_marker: [],
+      master_plan_locator_data_fields: [],
+      master_plan_location_highlight_svg: "",
+    });
   }, [documentId]);
 
   useEffect(() => {

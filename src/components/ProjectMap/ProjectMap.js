@@ -17,8 +17,6 @@ import ThreeSixtyMarker from "../Markers/ThreeSixtyMarker";
 import InventoryMarker from "../Markers/InventoryMarkers/Locator";
 import ProjectMapInfoCard from "../ProjectMapInfoCard/ProjectMapInfoCard";
 import { useParams, useRouter } from "next/navigation";
-import { FETCH_ALL_PROJECTS } from "@/constants/constants";
-import qs from "qs";
 
 export default function ProjectMap({ handleMainLocationClick }) {
   const router = useRouter();
@@ -196,26 +194,19 @@ export default function ProjectMap({ handleMainLocationClick }) {
   }, [initialScale]);
 
   useEffect(() => {
-    const fetchProject = async () => {
-      const query = qs.stringify({
-        populate: [
-          "project_main_map_image",
-          "main_project_map_landmarks",
-          "main_project_map_landmarks.image",
-          "main_map_healthcare_markers",
-          "main_map_education_markers",
-          "main_map_shopping_markers",
-        ],
-        filters: {
-          project_slug: slug,
-        },
-        fields: ["id", "project_title", "project_slug"],
-      });
-      const data = await fetch(`${FETCH_ALL_PROJECTS}?${query}`);
-      const project = await data.json();
-      setMainProjectData(project.data[0]);
-    };
-    fetchProject();
+    // Set dummy data instead of API call
+    setMainProjectData({
+      id: 1,
+      project_title: "Emaar Properties",
+      project_slug: slug,
+      project_main_map_image: {
+        url: "/emaar-map.svg",
+      },
+      main_project_map_landmarks: [],
+      main_map_healthcare_markers: [],
+      main_map_education_markers: [],
+      main_map_shopping_markers: [],
+    });
   }, [slug]);
 
   const handleImageLoad = () => {
@@ -389,27 +380,6 @@ export default function ProjectMap({ handleMainLocationClick }) {
                     className="absolute top-0 left-0 w-full h-full pointer-events-none"
                     style={{ zIndex: 20 }}
                   >
-                    {/* Oasis Button */}
-                    <div
-                      className="absolute"
-                      style={{ left: "660px", top: "540px" }}
-                    >
-                      <button
-                        className="bg-black flex-shrink-0 flex flex-row items-center gap-2 text-white rounded-full px-5 py-3 cursor-pointer hover:bg-white hover:text-black transition-all duration-300 pointer-events-auto z-20"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          router.push("/oasis");
-                        }}
-                        onMouseEnter={() => setHoveredProject("oasis")}
-                        onMouseLeave={() => setHoveredProject(null)}
-                      >
-                        <span className="font-bold text-sm whitespace-nowrap">
-                          The Oasis
-                        </span>
-                      </button>
-                    </div>
-
                     {/* Grand Polo Button */}
                     <div
                       className="absolute"

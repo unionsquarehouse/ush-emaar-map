@@ -9,8 +9,6 @@ import ThreeSixtyView from "../ThreeSixtyView/ThreeSixtyView";
 import SubCommunity from "../SubCommunity/SubCommunity";
 import { AppContext } from "@/context/appContext";
 import { useParams } from "next/navigation";
-import { FETCH_ALL_PROJECTS } from "@/constants/constants";
-import qs from "qs";
 
 export default function Inventory({ setSideBarButtonClicked }) {
   const { setShowBackButton, setBackButtonCallback } = useContext(AppContext);
@@ -118,27 +116,15 @@ export default function Inventory({ setSideBarButtonClicked }) {
   }, [initialScale]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const query = qs.stringify({
-        populate: [
-          "inventory_map_image",
-          "inventory_three_sixty_markers",
-          "inventory_three_sixty_markers.image",
-          "inventory_three_sixty_markers.card_image",
-          "inventory_locator_marker",
-          "inventory_locator_marker.locator",
-          "inventory_locator_marker.master_plan",
-        ],
-        filters: {
-          project_slug: slug,
-        },
-        fields: ["id"],
-      });
-      const data = await fetch(`${FETCH_ALL_PROJECTS}?${query}`);
-      const project = await data.json();
-      setInventoryData(project.data[0]);
-    };
-    fetchData();
+    // Set dummy data instead of API call
+    setInventoryData({
+      id: 1,
+      inventory_map_image: {
+        url: "/inventory_image.jpg",
+      },
+      inventory_three_sixty_markers: [],
+      inventory_locator_marker: [],
+    });
   }, [slug]);
 
   return (
