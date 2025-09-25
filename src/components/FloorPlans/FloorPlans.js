@@ -2,57 +2,83 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import { useParams } from "next/navigation";
 
 export default function FloorPlans({ setSideBarButtonClicked }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [selectedProperty, setSelectedProperty] = useState("The Oasis");
+  const [selectedSubProperty, setSelectedSubProperty] = useState(null);
 
-  // All 8 properties
-  const properties = [
-    "The Oasis",
-    "Grand Polo",
-    "Emaar South",
-    "Dubai Hills",
-    "Expo Living",
-    "Dubai Creek Harbour",
-    "Rashid Yachts",
-    "The Valley",
-  ];
+  const { slug } = useParams();
 
-  // Property-specific floor plan data
+  // Get sub-properties based on current URL slug
+  const getSubProperties = (slug) => {
+    const subPropertiesData = {
+      "the-oasis": ["Oasis Phase 1", "Oasis Phase 2", "Oasis Phase 3"],
+      "grand-polo": ["GP1", "GP2", "GP3"],
+      "emaar-south": ["ES1", "ES2", "ES3"],
+      "dubai-hills": ["DH1", "DH2", "DH3"],
+      "expo-living": ["EL1", "EL2", "EL3"],
+      "dubai-creek-harbour": ["DCH1", "DCH2", "DCH3"],
+      "rashid-yachts": ["RY1", "RY2", "RY3"],
+      "the-valley": ["TV1", "TV2", "TV3"],
+    };
+    return subPropertiesData[slug] || ["Default 1", "Default 2", "Default 3"];
+  };
+
+  const subProperties = getSubProperties(slug);
+
+  // Set default selected sub-property
+  useEffect(() => {
+    if (subProperties.length > 0 && !selectedSubProperty) {
+      setSelectedSubProperty(subProperties[0]);
+    }
+  }, [subProperties, selectedSubProperty]);
+
+  // Generate dummy floor plan data based on selected sub-property
+  const generateFloorPlanData = (subProperty) => {
+    const baseFloorPlans = [
+      {
+        id: 1,
+        src: "/inventory_image.jpg",
+        alt: "Floor Plan 1",
+        title: "2 Bedroom",
+        description: "Spacious 2 bedroom layout",
+      },
+      {
+        id: 2,
+        src: "/inventory_image.jpg",
+        alt: "Floor Plan 2",
+        title: "3 Bedroom",
+        description: "Luxurious 3 bedroom layout",
+      },
+      {
+        id: 3,
+        src: "/inventory_image.jpg",
+        alt: "Floor Plan 3",
+        title: "4 Bedroom",
+        description: "Premium 4 bedroom layout",
+      },
+      {
+        id: 4,
+        src: "/inventory_image.jpg",
+        alt: "Floor Plan 4",
+        title: "Penthouse",
+        description: "Exclusive penthouse layout",
+      },
+    ];
+
+    return baseFloorPlans.map((plan) => ({
+      ...plan,
+      title: `${subProperty} - ${plan.title}`,
+      alt: `${subProperty} - ${plan.alt}`,
+      description: `${subProperty} - ${plan.description}`,
+    }));
+  };
+
+  // Property-specific floor plan data (keeping for backward compatibility)
   const getFloorPlansForProperty = (property) => {
     const floorPlanData = {
-      "The Oasis": [
-        {
-          id: 1,
-          src: "/inventory_image.jpg",
-          alt: "Oasis 2BR Villa",
-          title: "2 Bedroom Villa",
-          description: "Spacious 2 bedroom villa with modern amenities",
-        },
-        {
-          id: 2,
-          src: "/inventory_image.jpg",
-          alt: "Oasis 3BR Villa",
-          title: "3 Bedroom Villa",
-          description: "Luxurious 3 bedroom villa with garden view",
-        },
-        {
-          id: 3,
-          src: "/inventory_image.jpg",
-          alt: "Oasis 4BR Villa",
-          title: "4 Bedroom Villa",
-          description: "Premium 4 bedroom villa with private pool",
-        },
-        {
-          id: 4,
-          src: "/inventory_image.jpg",
-          alt: "Oasis Penthouse",
-          title: "Penthouse",
-          description: "Exclusive penthouse with panoramic views",
-        },
-      ],
       "Grand Polo": [
         {
           id: 1,
@@ -183,28 +209,41 @@ export default function FloorPlans({ setSideBarButtonClicked }) {
     return floorPlanData[property] || floorPlanData["The Oasis"];
   };
 
-  const floorPlanImages = getFloorPlansForProperty(selectedProperty);
+  const [floorPlanImages, setFloorPlanImages] = useState([]);
+
+  // Update floor plan data when sub-property changes
+  useEffect(() => {
+    if (selectedSubProperty) {
+      const generatedData = generateFloorPlanData(selectedSubProperty);
+      setFloorPlanImages(generatedData);
+      setCurrentImageIndex(0);
+    }
+  }, [selectedSubProperty]);
 
   const nextImage = () => {
-    setCurrentImageIndex((prevIndex) =>
-      prevIndex === floorPlanImages.length - 1 ? 0 : prevIndex + 1
-    );
+    if (floorPlanImages.length > 0) {
+      setCurrentImageIndex((prevIndex) =>
+        prevIndex === floorPlanImages.length - 1 ? 0 : prevIndex + 1
+      );
+    }
   };
 
   const prevImage = () => {
-    setCurrentImageIndex((prevIndex) =>
-      prevIndex === 0 ? floorPlanImages.length - 1 : prevIndex - 1
-    );
+    if (floorPlanImages.length > 0) {
+      setCurrentImageIndex((prevIndex) =>
+        prevIndex === 0 ? floorPlanImages.length - 1 : prevIndex - 1
+      );
+    }
   };
 
   const goToImage = (index) => {
-    setCurrentImageIndex(index);
-  };
-
-  const handlePropertySelect = (property) => {
-    setSelectedProperty(property);
-    setCurrentImageIndex(0); // Reset to first image when property changes
-    setIsDropdownOpen(false);
+    if (
+      floorPlanImages.length > 0 &&
+      index >= 0 &&
+      index < floorPlanImages.length
+    ) {
+      setCurrentImageIndex(index);
+    }
   };
 
   // Touch/swipe functionality
@@ -275,13 +314,15 @@ export default function FloorPlans({ setSideBarButtonClicked }) {
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
         >
-          <Image
-            src={floorPlanImages[currentImageIndex].src}
-            alt={floorPlanImages[currentImageIndex].alt}
-            fill
-            className="object-cover"
-            priority
-          />
+          {floorPlanImages.length > 0 && floorPlanImages[currentImageIndex] && (
+            <Image
+              src={floorPlanImages[currentImageIndex].src}
+              alt={floorPlanImages[currentImageIndex].alt}
+              fill
+              className="object-cover"
+              priority
+            />
+          )}
         </div>
       </div>
 
@@ -295,7 +336,7 @@ export default function FloorPlans({ setSideBarButtonClicked }) {
             setIsDropdownOpen(!isDropdownOpen);
           }}
         >
-          {selectedProperty}
+          {selectedSubProperty || "Select Property"}
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -316,19 +357,20 @@ export default function FloorPlans({ setSideBarButtonClicked }) {
       {/* Dropdown Menu */}
       {isDropdownOpen && (
         <div className="absolute bottom-32 left-4 z-50 bg-black/90 rounded-md overflow-hidden shadow-lg dropdown-container w-48">
-          {properties.map((property) => (
+          {subProperties.map((subProperty) => (
             <button
-              key={property}
+              key={subProperty}
               className={`w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 transition-colors cursor-pointer ${
-                selectedProperty === property ? "bg-gray-600" : ""
+                selectedSubProperty === subProperty ? "bg-gray-600" : ""
               }`}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                handlePropertySelect(property);
+                setSelectedSubProperty(subProperty);
+                setIsDropdownOpen(false);
               }}
             >
-              {property}
+              {subProperty}
             </button>
           ))}
         </div>
@@ -359,24 +401,25 @@ export default function FloorPlans({ setSideBarButtonClicked }) {
 
           {/* Thumbnails */}
           <div className="flex space-x-2">
-            {floorPlanImages.map((image, index) => (
-              <button
-                key={image.id}
-                onClick={() => goToImage(index)}
-                className={`relative w-16 h-12 rounded-lg overflow-hidden transition-all duration-200 ${
-                  index === currentImageIndex
-                    ? "ring-2 ring-white scale-110"
-                    : "opacity-60 hover:opacity-100"
-                }`}
-              >
-                <Image
-                  src={image.src}
-                  alt={image.alt}
-                  fill
-                  className="object-cover"
-                />
-              </button>
-            ))}
+            {floorPlanImages.length > 0 &&
+              floorPlanImages.map((image, index) => (
+                <button
+                  key={image.id}
+                  onClick={() => goToImage(index)}
+                  className={`relative w-16 h-12 rounded-lg overflow-hidden transition-all duration-200 ${
+                    index === currentImageIndex
+                      ? "ring-2 ring-white scale-110"
+                      : "opacity-60 hover:opacity-100"
+                  }`}
+                >
+                  <Image
+                    src={image.src}
+                    alt={image.alt}
+                    fill
+                    className="object-cover"
+                  />
+                </button>
+              ))}
           </div>
 
           {/* Right Arrow */}
@@ -402,7 +445,9 @@ export default function FloorPlans({ setSideBarButtonClicked }) {
 
         {/* Image Counter */}
         <div className="text-center mt-2 text-white text-sm">
-          {currentImageIndex + 1} of {floorPlanImages.length}
+          {floorPlanImages.length > 0
+            ? `${currentImageIndex + 1} of ${floorPlanImages.length}`
+            : "0 of 0"}
         </div>
       </div>
     </div>

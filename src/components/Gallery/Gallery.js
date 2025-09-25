@@ -1,12 +1,10 @@
-import { FETCH_ALL_PROJECTS } from "@/constants/constants";
 import Image from "next/image";
 import React, { useState, useRef, useEffect } from "react";
-import qs from "qs";
 import { useParams } from "next/navigation";
 
 export default function Gallery() {
   const [isButtonClicked, setIsButtonClicked] = useState(false);
-  const [selectedButton, setSelectedButton] = useState("The Oasis");
+  const [selectedSubProperty, setSelectedSubProperty] = useState(null);
   const [selectedBottomButton, setSelectedBottomButton] = useState(null);
   const [galleryData, setGalleryData] = useState(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -18,17 +16,62 @@ export default function Gallery() {
   const { slug } = useParams();
   const [bottomButtons, setBottomButtons] = useState(null);
 
-  // All 8 properties
-  const properties = [
-    "The Oasis",
-    "Grand Polo",
-    "Emaar South",
-    "Dubai Hills",
-    "Expo Living",
-    "Dubai Creek Harbour",
-    "Rashid Yachts",
-    "The Valley",
-  ];
+  // Get sub-properties based on current URL slug
+  const getSubProperties = (slug) => {
+    const subPropertiesData = {
+      "the-oasis": ["Oasis Phase 1", "Oasis Phase 2", "Oasis Phase 3"],
+      "grand-polo": ["GP1", "GP2", "GP3"],
+      "emaar-south": ["ES1", "ES2", "ES3"],
+      "dubai-hills": ["DH1", "DH2", "DH3"],
+      "expo-living": ["EL1", "EL2", "EL3"],
+      "dubai-creek-harbour": ["DCH1", "DCH2", "DCH3"],
+      "rashid-yachts": ["RY1", "RY2", "RY3"],
+      "the-valley": ["TV1", "TV2", "TV3"],
+    };
+    return subPropertiesData[slug] || ["Default 1", "Default 2", "Default 3"];
+  };
+
+  const subProperties = getSubProperties(slug);
+
+  // Set default selected sub-property
+  useEffect(() => {
+    if (subProperties.length > 0 && !selectedSubProperty) {
+      setSelectedSubProperty(subProperties[0]);
+    }
+  }, [subProperties, selectedSubProperty]);
+
+  // Generate dummy gallery data based on selected sub-property
+  const generateGalleryData = (subProperty) => {
+    const baseImages = [
+      {
+        id: 1,
+        name: "Exterior View",
+        url: "/inventory_image.jpg",
+        alt: "Exterior View",
+      },
+      {
+        id: 2,
+        name: "Interior View",
+        url: "/inventory_image.jpg",
+        alt: "Interior View",
+      },
+      {
+        id: 3,
+        name: "Living Room",
+        url: "/inventory_image.jpg",
+        alt: "Living Room",
+      },
+      { id: 4, name: "Kitchen", url: "/inventory_image.jpg", alt: "Kitchen" },
+      { id: 5, name: "Bedroom", url: "/inventory_image.jpg", alt: "Bedroom" },
+    ];
+
+    return baseImages.map((img) => ({
+      ...img,
+      name: `${subProperty} - ${img.name}`,
+      alt: `${subProperty} - ${img.alt}`,
+    }));
+  };
+
   // Check if scroll buttons should be visible
   const checkScroll = () => {
     if (buttonContainerRef.current) {
@@ -94,43 +137,23 @@ export default function Gallery() {
       buttonContainerRef.current?.removeEventListener("scroll", checkScroll);
   }, [bottomButtons]);
 
+  // Update gallery data when sub-property changes
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const query = qs.stringify({
-          populate: [
-            "gallery",
-            "gallery.bottom_buttons",
-            "gallery.bottom_buttons.image",
-          ],
-          filters: {
-            project_slug: slug,
-          },
-          fields: ["id"],
-        });
-        const data = await fetch(`${FETCH_ALL_PROJECTS}?${query}`);
-        const project = await data.json();
-        const initialButton = project.data[0].gallery[0].bottom_buttons[0];
-
-        setGalleryData(project.data[0]);
-        setSelectedButton(project.data[0].gallery[0].name);
-        setBottomButtons(project.data[0].gallery[0].bottom_buttons);
-        setSelectedBottomButton(initialButton);
-        setCurrentImageUrl(initialButton?.image?.url);
-        setCurrentImageIndex(0);
-      } catch (error) {
-        console.error("Error fetching gallery data:", error);
-      }
-    };
-    fetchData();
-  }, [slug]);
+    if (selectedSubProperty) {
+      const generatedData = generateGalleryData(selectedSubProperty);
+      setBottomButtons(generatedData);
+      setSelectedBottomButton(generatedData[0]);
+      setCurrentImageUrl(generatedData[0]?.url);
+      setCurrentImageIndex(0);
+    }
+  }, [selectedSubProperty]);
 
   // Update current image when index changes
   useEffect(() => {
     if (bottomButtons && bottomButtons[currentImageIndex]) {
       const selectedButton = bottomButtons[currentImageIndex];
       setSelectedBottomButton(selectedButton);
-      setCurrentImageUrl(selectedButton?.image?.url);
+      setCurrentImageUrl(selectedButton?.url || selectedButton?.image?.url);
       setIsImageLoaded(false);
     }
   }, [currentImageIndex, bottomButtons]);
@@ -154,7 +177,11 @@ export default function Gallery() {
               <Image
                 onLoad={handleImageLoad}
                 src={currentImageUrl}
-                alt={selectedBottomButton?.image?.alternativeText || ""}
+                alt={
+                  selectedBottomButton?.alt ||
+                  selectedBottomButton?.image?.alternativeText ||
+                  ""
+                }
                 fill
                 priority
                 unoptimized
@@ -185,7 +212,7 @@ export default function Gallery() {
             className="bg-black/80 text-white px-4 py-2 rounded-md flex items-center gap-2 text-sm font-normal cursor-pointer"
             onClick={() => setIsButtonClicked(!isButtonClicked)}
           >
-            {selectedButton}
+            {selectedSubProperty || "Select Property"}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -206,19 +233,18 @@ export default function Gallery() {
         {/* DropDown Menu */}
         {isButtonClicked && (
           <div className="absolute bottom-32 left-4 z-50 bg-black/90 rounded-md overflow-hidden shadow-lg w-48">
-            {properties.map((property) => (
+            {subProperties.map((subProperty) => (
               <button
-                key={property}
+                key={subProperty}
                 className={`w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 transition-colors cursor-pointer ${
-                  selectedButton === property ? "bg-gray-600" : ""
+                  selectedSubProperty === subProperty ? "bg-gray-600" : ""
                 }`}
                 onClick={() => {
-                  setSelectedButton(property);
+                  setSelectedSubProperty(subProperty);
                   setIsButtonClicked(false);
-                  // You can add logic here to load property-specific gallery data
                 }}
               >
-                {property}
+                {subProperty}
               </button>
             ))}
           </div>
@@ -262,8 +288,16 @@ export default function Gallery() {
                   }`}
                 >
                   <Image
-                    src={button?.image?.url || "/inventory_image.jpg"}
-                    alt={button?.image?.alternativeText || button.name}
+                    src={
+                      button?.url ||
+                      button?.image?.url ||
+                      "/inventory_image.jpg"
+                    }
+                    alt={
+                      button?.alt ||
+                      button?.image?.alternativeText ||
+                      button.name
+                    }
                     fill
                     className="object-cover"
                   />
