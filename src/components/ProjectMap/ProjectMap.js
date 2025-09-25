@@ -555,114 +555,83 @@ export default function ProjectMap({ handleMainLocationClick }) {
                             console.log(
                               "SVG document found, adding event listeners..."
                             );
-                            // Add click handlers to each property path
-                            const properties = [
-                              "the-oasis-property",
-                              "emaar-south-property",
-                              "the-valley-property",
-                              "dubai-hills-property",
-                              "grand-polo-property",
-                              "dubai-creek-harbour-property",
-                              "expo-living-property",
-                              "rashid-yachts-property",
+                            // Add click handlers to property areas (classes st1 and st2)
+                            const st1Elements = svgDoc.querySelectorAll(".st1");
+                            const st2Elements = svgDoc.querySelectorAll(".st2");
+                            const propertyElements = [
+                              ...st1Elements,
+                              ...st2Elements,
                             ];
 
-                            properties.forEach((propertyClass) => {
-                              const elements = svgDoc.querySelectorAll(
-                                `.${propertyClass}`
-                              );
+                            console.log(
+                              `Found ${st1Elements.length} st1 elements and ${st2Elements.length} st2 elements`
+                            );
+                            console.log(
+                              `Total property elements: ${propertyElements.length}`
+                            );
+
+                            // Property names mapping (7 total properties)
+                            const propertyNames = [
+                              "Expo Living", // 1
+                              "Rashid Yachts", // 2
+                              "Emaar South", // 3
+                              "The Valley", // 4
+                              "Dubai Hills", // 5
+                              "Grand Polo", // 6
+                              "Dubai Creek Harbour", // 7
+                            ];
+
+                            propertyElements.forEach((element, index) => {
+                              const propertyName =
+                                propertyNames[index] || `Property ${index + 1}`;
                               console.log(
-                                `Found ${elements.length} elements for ${propertyClass}`
+                                `Setting up click handler for ${propertyName}`
                               );
-                              elements.forEach((element) => {
-                                element.style.cursor = "pointer";
-                                element.style.pointerEvents = "auto";
 
-                                // Remove existing listeners to avoid duplicates
-                                element.removeEventListener(
-                                  "click",
-                                  handleClick
+                              element.style.cursor = "pointer";
+                              element.style.pointerEvents = "auto";
+
+                              // Remove existing listeners to avoid duplicates
+                              element.removeEventListener("click", handleClick);
+                              element.removeEventListener(
+                                "mouseenter",
+                                handleMouseEnter
+                              );
+                              element.removeEventListener(
+                                "mouseleave",
+                                handleMouseLeave
+                              );
+
+                              // Add new listeners
+                              element.addEventListener("click", handleClick);
+                              element.addEventListener(
+                                "mouseenter",
+                                handleMouseEnter
+                              );
+                              element.addEventListener(
+                                "mouseleave",
+                                handleMouseLeave
+                              );
+
+                              function handleClick(e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                console.log(
+                                  `Property ${
+                                    index + 1
+                                  } clicked: ${propertyName}`
                                 );
-                                element.removeEventListener(
-                                  "mouseenter",
-                                  handleMouseEnter
-                                );
-                                element.removeEventListener(
-                                  "mouseleave",
-                                  handleMouseLeave
-                                );
+                              }
 
-                                // Add new listeners
-                                element.addEventListener("click", handleClick);
-                                element.addEventListener(
-                                  "mouseenter",
-                                  handleMouseEnter
-                                );
-                                element.addEventListener(
-                                  "mouseleave",
-                                  handleMouseLeave
-                                );
+                              function handleMouseEnter(e) {
+                                e.target.style.fill = "rgb(141, 122, 71)";
+                                e.target.style.opacity = "0.8";
+                              }
 
-                                function handleClick(e) {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  console.log(`SVG clicked: ${propertyClass}`);
-
-                                  let propertyName = propertyClass
-                                    .replace("-property", "")
-                                    .replace("-", " ")
-                                    .replace(/\b\w/g, (l) => l.toUpperCase());
-
-                                  // Correct property names based on mapping
-                                  if (propertyClass === "the-oasis-property") {
-                                    propertyName = "The Oasis";
-                                  }
-                                  if (
-                                    propertyClass === "emaar-south-property"
-                                  ) {
-                                    propertyName = "Emaar South";
-                                  }
-                                  if (propertyClass === "the-valley-property") {
-                                    propertyName = "The Valley";
-                                  }
-                                  if (
-                                    propertyClass === "dubai-hills-property"
-                                  ) {
-                                    propertyName = "Dubai Hills";
-                                  }
-                                  if (propertyClass === "grand-polo-property") {
-                                    propertyName = "Grand Polo";
-                                  }
-                                  if (
-                                    propertyClass ===
-                                    "dubai-creek-harbour-property"
-                                  ) {
-                                    propertyName = "Dubai Creek Harbour";
-                                  }
-                                  if (
-                                    propertyClass === "expo-living-property"
-                                  ) {
-                                    propertyName = "Expo Living";
-                                  }
-                                  if (
-                                    propertyClass === "rashid-yachts-property"
-                                  ) {
-                                    propertyName = "Rashid Yachts";
-                                  }
-
-                                  console.log(propertyName);
-                                }
-
-                                function handleMouseEnter(e) {
-                                  e.target.style.fill = "rgb(141, 122, 71)";
-                                  e.target.style.opacity = "0.8";
-                                }
-
-                                function handleMouseLeave(e) {
-                                  e.target.style.fill = "";
-                                  e.target.style.opacity = "";
-                                }
-                              });
+                              function handleMouseLeave(e) {
+                                e.target.style.fill = "";
+                                e.target.style.opacity = "";
+                              }
                             });
                           } else {
                             console.log("SVG document not found, retrying...");
