@@ -1,10 +1,12 @@
 import React from "react";
+import { useRouter } from "next/navigation";
 
 export default function SideBar({
   sideBarButtonClicked,
   handleSideBarButtonClick,
   hideNavigationOptions = false,
 }) {
+  const router = useRouter();
   // Don't render sidebar if all navigation options are hidden
   if (hideNavigationOptions) {
     return null;
@@ -21,7 +23,9 @@ export default function SideBar({
                 ? "bg-white text-black"
                 : "hover:bg-gray-700"
             } p-3 cursor-pointer rounded-t-lg`}
-            onClick={() => handleSideBarButtonClick(0)}
+            onClick={() => {
+              router.push("/");
+            }}
           >
             <button className="flex flex-col items-center w-full cursor-pointer">
               <svg
@@ -60,7 +64,9 @@ export default function SideBar({
                 />
               </svg>
 
-              <span className="font-normal text-xs md:text-sm">Inventory</span>
+              <span className="font-normal text-xs md:text-sm">
+                Floor Plans
+              </span>
             </button>
           </li>
           <li
