@@ -1,33 +1,38 @@
 "use client";
 
 import Gallery from "@/components/Gallery/Gallery";
-import ProjectPage from "@/components/ProjectPage/ProjectPage";
 import FloorPlans from "@/components/FloorPlans/FloorPlans";
+import Brochure from "@/components/Brochure/Brochure";
 import NavBar from "@/components/NavBar/NavBar";
-import ProjectMap from "@/components/ProjectMap/ProjectMap";
+import SimpleMap from "@/components/SimpleMap/SimpleMap";
 import SideBar from "@/components/SideBar/SideBar";
 import { useState } from "react";
 
 export default function ExpoLivingPage() {
-  const [sideBarButtonClicked, setSideBarButtonClicked] = useState(1); // Start with project view
+  const [sideBarButtonClicked, setSideBarButtonClicked] = useState(1); // Start with Map view
   const [isFullScreen, setIsFullScreen] = useState(false);
 
   const handleSideBarButtonClick = (index) => {
     setSideBarButtonClicked(index);
   };
 
-  const handleMainLocationClick = () => {
-    setSideBarButtonClicked(1);
-  };
-
   return (
     <div className="w-full h-full">
-      {sideBarButtonClicked === 0 && (
-        <ProjectMap handleMainLocationClick={handleMainLocationClick} />
-      )}
-      {sideBarButtonClicked === 2 && <Gallery />}
       {sideBarButtonClicked === 1 && (
-        <FloorPlans setSideBarButtonClicked={setSideBarButtonClicked} />
+        <SimpleMap setSideBarButtonClicked={setSideBarButtonClicked} />
+      )}
+      {sideBarButtonClicked === 2 && (
+        <FloorPlans
+          setSideBarButtonClicked={setSideBarButtonClicked}
+          communitySlug="expo-living"
+        />
+      )}
+      {sideBarButtonClicked === 3 && <Gallery communitySlug="expo-living" />}
+      {sideBarButtonClicked === 4 && (
+        <Brochure
+          setSideBarButtonClicked={setSideBarButtonClicked}
+          communitySlug="expo-living"
+        />
       )}
 
       <NavBar isFullScreen={isFullScreen} setIsFullScreen={setIsFullScreen} />

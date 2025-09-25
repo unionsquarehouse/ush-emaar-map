@@ -2,9 +2,9 @@ import Image from "next/image";
 import React, { useState, useRef, useEffect } from "react";
 import { useParams } from "next/navigation";
 
-export default function Gallery() {
+export default function Gallery({ communitySlug, onPropertySelect }) {
   const [isButtonClicked, setIsButtonClicked] = useState(false);
-  const [selectedSubProperty, setSelectedSubProperty] = useState(null);
+  const [selectedProperty, setSelectedProperty] = useState(null);
   const [selectedBottomButton, setSelectedBottomButton] = useState(null);
   const [galleryData, setGalleryData] = useState(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -16,60 +16,235 @@ export default function Gallery() {
   const { slug } = useParams();
   const [bottomButtons, setBottomButtons] = useState(null);
 
-  // Get sub-properties based on current URL slug
-  const getSubProperties = (slug) => {
-    const subPropertiesData = {
-      "the-oasis": ["Oasis Phase 1", "Oasis Phase 2", "Oasis Phase 3"],
-      "grand-polo": ["GP1", "GP2", "GP3"],
-      "emaar-south": ["ES1", "ES2", "ES3"],
-      "dubai-hills": ["DH1", "DH2", "DH3"],
-      "expo-living": ["EL1", "EL2", "EL3"],
-      "dubai-creek-harbour": ["DCH1", "DCH2", "DCH3"],
-      "rashid-yachts": ["RY1", "RY2", "RY3"],
-      "the-valley": ["TV1", "TV2", "TV3"],
+  // Get community name from URL slug or prop
+  const getCommunityName = (slug) => {
+    const communityMap = {
+      "grand-polo": "grand-polo",
+      "emaar-south": "emaar-south",
+      "dubai-hills": "dubai-hills",
+      "expo-living": "expo-living",
+      "dubai-creek-harbour": "dubai-creek-harbour",
+      "rashid-yachts": "rashid-yachts",
+      "the-valley": "the-valley",
     };
-    return subPropertiesData[slug] || ["Default 1", "Default 2", "Default 3"];
+    return communityMap[slug] || "grand-polo";
   };
 
-  const subProperties = getSubProperties(slug);
+  // Get all properties from all communities (same as FloorPlans and Brochure)
+  const getAllProperties = () => {
+    const allProperties = [
+      // Grand Polo properties
+      {
+        name: "chevalia-estate-2",
+        community: "grand-polo",
+        displayName: "Chevalia Estate 2",
+      },
+      { name: "montura-3", community: "grand-polo", displayName: "Montura 3" },
+      { name: "selvara", community: "grand-polo", displayName: "Selvara" },
+      { name: "selvara-2", community: "grand-polo", displayName: "Selvara 2" },
+      { name: "selvara-3", community: "grand-polo", displayName: "Selvara 3" },
+      { name: "selvara-4", community: "grand-polo", displayName: "Selvara 4" },
 
-  // Set default selected sub-property
-  useEffect(() => {
-    if (subProperties.length > 0 && !selectedSubProperty) {
-      setSelectedSubProperty(subProperties[0]);
-    }
-  }, [subProperties, selectedSubProperty]);
+      // Emaar South properties
+      // {
+      //   name: "golf-acres",
+      //   community: "emaar-south",
+      //   displayName: "Golf Acres",
+      // },
+      // { name: "golf-dale", community: "emaar-south", displayName: "Golf Dale" },
+      {
+        name: "golf-meadow",
+        community: "emaar-south",
+        displayName: "Golf Meadow",
+      },
+      {
+        name: "golf-point",
+        community: "emaar-south",
+        displayName: "Golf Point",
+      },
+      {
+        name: "golf-verge",
+        community: "emaar-south",
+        displayName: "Golf Verge",
+      },
 
-  // Generate dummy gallery data based on selected sub-property
-  const generateGalleryData = (subProperty) => {
-    const baseImages = [
+      // Dubai Hills properties
       {
-        id: 1,
-        name: "Exterior View",
-        url: "/inventory_image.jpg",
-        alt: "Exterior View",
+        name: "golf-hillside",
+        community: "dubai-hills",
+        displayName: "Golf Hillside",
       },
       {
-        id: 2,
-        name: "Interior View",
-        url: "/inventory_image.jpg",
-        alt: "Interior View",
+        name: "hillsedge",
+        community: "dubai-hills",
+        displayName: "Hillsedge Tower A",
+      },
+     
+      { name: "parkwood", community: "dubai-hills", displayName: "Parkwood" },
+      { name: "rosehill", community: "dubai-hills", displayName: "Rosehill" },
+      {
+        name: "vida-residences-hillside",
+        community: "dubai-hills",
+        displayName: "Vida Residences Hillside",
+      },
+
+      // Expo Living properties
+      {
+        name: "terra-heights",
+        community: "expo-living",
+        displayName: "Terra Heights",
+      },
+
+      // Dubai Creek Harbour properties
+      {
+        name: "albero",
+        community: "dubai-creek-harbour",
+        displayName: "Albero",
+      },
+      { name: "altan", community: "dubai-creek-harbour", displayName: "Altan" },
+      // {
+      //   name: "montiva",
+      //   community: "dubai-creek-harbour",
+      //   displayName: "Montiva",
+      // },
+      { name: "silva", community: "dubai-creek-harbour", displayName: "Silva" },
+
+      // Rashid Yachts properties
+      {
+        name: "baystar-by-vida",
+        community: "rashid-yachts",
+        displayName: "Baystar By Vida",
       },
       {
-        id: 3,
-        name: "Living Room",
-        url: "/inventory_image.jpg",
-        alt: "Living Room",
+        name: "pier-point-2",
+        community: "rashid-yachts",
+        displayName: "Pier Point 2",
       },
-      { id: 4, name: "Kitchen", url: "/inventory_image.jpg", alt: "Kitchen" },
-      { id: 5, name: "Bedroom", url: "/inventory_image.jpg", alt: "Bedroom" },
+      { name: "sera-2", community: "rashid-yachts", displayName: "Sera 2" },
+
+      // The Valley properties
+      { name: "rivera", community: "the-valley", displayName: "Rivera" },
+      { name: "vindera", community: "the-valley", displayName: "Vindera" },
     ];
 
-    return baseImages.map((img) => ({
-      ...img,
-      name: `${subProperty} - ${img.name}`,
-      alt: `${subProperty} - ${img.alt}`,
-    }));
+    return allProperties;
+  };
+
+  const communityName = getCommunityName(communitySlug || slug);
+  const allProperties = getAllProperties();
+
+  // Filter properties by current community
+  const communityProperties = allProperties.filter(
+    (property) => property.community === communityName
+  );
+
+  // Set default selected property from filtered community
+  useEffect(() => {
+    if (communityProperties.length > 0 && !selectedProperty) {
+      setSelectedProperty(communityProperties[0]);
+    }
+  }, [communityProperties, selectedProperty]);
+
+  // Notify parent component when property changes
+  useEffect(() => {
+    if (selectedProperty && onPropertySelect) {
+      onPropertySelect(selectedProperty);
+    }
+  }, [selectedProperty, onPropertySelect]);
+
+  // Generate gallery data based on selected property and actual images
+  const generateGalleryData = (propertyObj) => {
+    // Map property names to their actual image file patterns
+    const imageFileMap = {
+      // Grand Polo
+      "chevalia-estate-2": { prefix: "CHEVALIA_ESTATE_GRAND_POLO_IMAGE", count: 10 },
+      "montura-3": { prefix: "MONUTRA_BRANDED_RENDERS", count: 10 },
+      selvara: { prefix: "SELVARA_GP_RENDER", count: 12 },
+      "selvara-2": { prefix: "SELVARA3_GP_RENDER", count: 10 },
+      "selvara-3": { prefix: "SELVARA3_GP_RENDER", count: 10 },
+      "selvara-4": { prefix: "SELVARA3_GP_RENDER", count: 10 },
+
+      // Dubai Creek Harbour
+      albero: { prefix: "ALBERO_DCH_IMAGE", count: 13 },
+      altan: { prefix: "ALTAN_DCH_IMAGE", count: 10 },
+      montiva: { prefix: "MONTIVA_DCH_IMAGE", count: 10 },
+      silva: { prefix: "SILVA_DCH_IMAGE", count: 10 },
+
+      // Dubai Hills
+      "golf-hillside": { prefix: "GOLF-HILLSIDE_DHE_BR", count: 10 },
+      hillsedge: { prefix: "HILLSEDGE_DHE_IMAGE", count: 10 },
+      parkwood: { prefix: "PARKWOOD_DHE_IMAGE", count: 10 },
+      rosehill: { prefix: "ROSEHILL_DHE_IMAGE", count: 11 },
+      "vida-residences-hillside": {
+        prefix: "VIDA_RH_DHE_IMAGE",
+        count: 9,
+      },
+
+      // Emaar South
+      "golf-acres": { prefix: "GOLF_ACRES_ES", count: 10 },
+      "golf-dale": { prefix: "GOLF_DALE_ES", count: 10 },
+      "golf-meadow": { prefix: "GOLF_MEDOW_ES_BRANDED_RENDERS", count: 8 },
+      "golf-point": { prefix: "BRANDED_RENDERS_GOLFPOINT_ES", count: 10 },
+      "golf-verge": { prefix: "GOLF-VERGE_ES_BR", count: 10 },
+
+      // Expo Living
+      "terra-heights": { prefix: "TERRAHEIGHTS_XL_RENDER", count: 11 },
+
+      // Rashid Yachts
+      "baystar-by-vida": { prefix: "BAYSTAR-BY-VIDA_RYM_BR", count: 10 },
+      "pier-point-2": { prefix: "PIERPOINT_RYM_BR", count: 10 },
+      "sera-2": { prefix: "SERA2_RYM_BR BR", count: 10 },
+
+      // The Valley
+      rivera: { prefix: "RIVERA_THE_VALLEY_IMAGE", count: 10 },
+      vindera: { prefix: "VINDERA_TH_BR", count: 10 },
+    };
+
+    const imageConfig = imageFileMap[propertyObj.name];
+
+    if (!imageConfig || imageConfig.count === 0) {
+      return [
+        {
+          id: 1,
+          name: `${propertyObj.displayName} - No Images Available`,
+          url: "/inventory_image.jpg",
+          alt: `${propertyObj.displayName} - No Images Available`,
+        },
+      ];
+    }
+
+    const images = [];
+    for (let i = 1; i <= imageConfig.count; i++) {
+      let fileName;
+
+      // Special handling for Selvara files
+      if (imageConfig.prefix === "SELVARA_GP_RENDER") {
+        fileName =
+          i === 1
+            ? `${imageConfig.prefix}.jpg`
+            : `${imageConfig.prefix}${i}.jpg`;
+      }
+      // Special handling for Golf Hillside files
+      else if (imageConfig.prefix === "GOLF-HILLSIDE_DHE_BR") {
+        fileName =
+          i === 1
+            ? `${imageConfig.prefix}.jpg`
+            : `${imageConfig.prefix}${i}.jpg`;
+      } else {
+        // Standard naming for other properties
+        const imageNumber = i.toString().padStart(2, "0");
+        fileName = `${imageConfig.prefix}${imageNumber}.jpg`;
+      }
+
+      images.push({
+        id: i,
+        name: `${propertyObj.displayName} - Image ${i}`,
+        url: `/communities/${propertyObj.community}/${propertyObj.name}/IMAGES/${fileName}`,
+        alt: `${propertyObj.displayName} - Image ${i}`,
+      });
+    }
+
+    return images;
   };
 
   // Check if scroll buttons should be visible
@@ -139,14 +314,14 @@ export default function Gallery() {
 
   // Update gallery data when sub-property changes
   useEffect(() => {
-    if (selectedSubProperty) {
-      const generatedData = generateGalleryData(selectedSubProperty);
+    if (selectedProperty) {
+      const generatedData = generateGalleryData(selectedProperty);
       setBottomButtons(generatedData);
       setSelectedBottomButton(generatedData[0]);
       setCurrentImageUrl(generatedData[0]?.url);
       setCurrentImageIndex(0);
     }
-  }, [selectedSubProperty]);
+  }, [selectedProperty]);
 
   // Update current image when index changes
   useEffect(() => {
@@ -207,12 +382,12 @@ export default function Gallery() {
         </div>
 
         {/* DropDown Button */}
-        <div className="absolute bottom-20 left-4 z-50">
+        <div className="absolute bottom-20 right-4 z-50">
           <button
             className="bg-black/80 text-white px-4 py-2 rounded-md flex items-center gap-2 text-sm font-normal cursor-pointer"
             onClick={() => setIsButtonClicked(!isButtonClicked)}
           >
-            {selectedSubProperty || "Select Property"}
+            {selectedProperty?.displayName || "Select Property"}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -232,19 +407,29 @@ export default function Gallery() {
 
         {/* DropDown Menu */}
         {isButtonClicked && (
-          <div className="absolute bottom-32 left-4 z-50 bg-black/90 rounded-md overflow-hidden shadow-lg w-48">
-            {subProperties.map((subProperty) => (
+          <div className="absolute bottom-32 right-4 z-50 bg-black/90 rounded-md overflow-hidden shadow-lg w-64 max-h-80 overflow-y-auto">
+            {communityProperties.map((property) => (
               <button
-                key={subProperty}
+                key={`${property.community}-${property.name}`}
                 className={`w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700 transition-colors cursor-pointer ${
-                  selectedSubProperty === subProperty ? "bg-gray-600" : ""
+                  selectedProperty?.name === property.name &&
+                  selectedProperty?.community === property.community
+                    ? "bg-gray-600"
+                    : ""
                 }`}
                 onClick={() => {
-                  setSelectedSubProperty(subProperty);
+                  setSelectedProperty(property);
                   setIsButtonClicked(false);
                 }}
               >
-                {subProperty}
+                <div className="flex flex-col">
+                  <span className="font-medium">{property.displayName}</span>
+                  <span className="text-xs text-gray-400">
+                    {property.community
+                      .replace(/-/g, " ")
+                      .replace(/\b\w/g, (l) => l.toUpperCase())}
+                  </span>
+                </div>
               </button>
             ))}
           </div>
